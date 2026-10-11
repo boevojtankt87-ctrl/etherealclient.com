@@ -9,10 +9,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="assets/screens/animation.jpg">
+<link rel="preload" as="image" href="assets/screens/animation_2.jpg">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/landing.css">
 </head>
 <body>
+<div id="intro">
+  <img class="intro-frame f1" src="assets/screens/animation.jpg" alt="ethereal">
+  <img class="intro-frame f2" src="assets/screens/animation_2.jpg" alt="ethereal logo">
+</div>
 <canvas id="bg"></canvas>
 
 <header>
@@ -37,7 +43,7 @@
 <section class="hero wrap">
   <span class="kicker reveal">ETHERIAL CLIENT · 1.21.11 · FABRIC</span>
   <h1 class="reveal">Играй на анархии<br>вместе с <em>Etherial</em></h1>
-  <p class="hero-sub reveal">Приватный клиент с отдельными обходами под каждый сервер. KillAura, ElytraFly и ESP настраиваются пресетом в два клика и обновляются под вайпы.</p>
+  <p class="hero-sub reveal">Приватный клиент для анархии: combat-модули, ESP, боты и удобный ClickGUI. Обходы под конкретные сервера доделываем обновлениями — честный статус смотри ниже, без сказок.</p>
   <div class="srv-row reveal">
     <span class="srv"><i></i>HOLYWORLD</span>
     <span class="srv"><i></i>FUNTIME</span>
@@ -59,8 +65,8 @@
   <div class="adv-grid">
     <div class="adv reveal">
       <div class="adv-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M12 3l7 3v5c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
-      <b>Обходы под сервера</b>
-      <p>Отдельные пресеты Aura, ElytraFly и Speed под HolyWorld, FunTime, ReallyWorld и DonutSMP. Обновляем перед вайпами, конфиги лежат в облаке.</p>
+      <b>Разработка под сервера</b>
+      <p>Целимся в HolyWorld, FunTime, ReallyWorld и DonutSMP. Пресеты выходят обновлениями, а актуальный статус каждого сервера — в таблице ниже. Не обещаем то, чего нет.</p>
     </div>
     <div class="adv reveal">
       <div class="adv-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M4 6h16v9H9l-5 4z"/><circle cx="9" cy="11" r=".9" fill="currentColor"/><circle cx="13" cy="11" r=".9" fill="currentColor"/><circle cx="17" cy="11" r=".9" fill="currentColor"/></svg></div>
@@ -70,7 +76,7 @@
     <div class="adv reveal">
       <div class="adv-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="3" y="13" width="8" height="5" rx="2"/></svg></div>
       <b>Оптимизация</b>
-      <p>Модуль Optimizer, свой батч-рендер и лёгкие шрифты: клиент не просаживает FPS и запускается даже на слабых компьютерах.</p>
+      <p>Модуль Optimizer, свой батч-рендер и лёгкие шрифты: стараемся не просаживать FPS, тянет даже на слабых компьютерах.</p>
     </div>
   </div>
   <div class="chips reveal">
@@ -85,8 +91,8 @@
 <section class="section wrap">
   <div class="sec-center reveal">
     <span class="kicker">Статус обходов</span>
-    <h2>Что работает прямо сейчас</h2>
-    <p>Честный статус по каждому проекту. Обновляем после каждого билда — без «всё работает», когда это не так.</p>
+    <h2>Что в работе прямо сейчас</h2>
+    <p>Честный статус по каждому проекту: что доделывается, что чинится. Обновляем после каждого билда.</p>
   </div>
   <div class="status-grid reveal" id="bypassGrid"></div>
 </section>
@@ -180,8 +186,8 @@
     <div class="qa reveal"><button>Как работает маркет конфигов?<i>+</i></button><div class="qa-body">Игроки выставляют свои пресеты, ты покупаешь за баланс: пополни его картой в кабинете, текст конфига откроется сразу после оплаты. Продавцу уходит 90% цены, выставить лот может любой владелец.</div></div>
     <div class="qa reveal"><button>Можно оплатить одной картой два аккаунта?<i>+</i></button><div class="qa-body">Нет: карта привязывается к одному UID навсегда. Это защита от перепродажи ключей. Для второго аккаунта нужна другая карта.</div></div>
     <div class="qa reveal"><button>Забыл пароль — что делать?<i>+</i></button><div class="qa-body">Нажми «Забыл пароль» в окне входа, введи ник и почту с регистрации — задашь новый пароль, все сессии при этом сбросятся. Поэтому указывай рабочую почту.</div></div>
-    <div class="qa reveal"><button>Что такое UID?<i>+</i></button><div class="qa-body">Порядковый номер аккаунта в проекте. Зарегистрировался вторым — UID 2, тысяча четыреста восемьдесят восьмым — UID 1488. Вводится в лоадере и привязывается к подписке и железу.</div></div>
-    <div class="qa reveal"><button>Под какие сервера сделаны обходы?<i>+</i></button><div class="qa-body">HolyWorld, FunTime, ReallyWorld и DonutSMP. Под каждый — отдельные пресеты Aura, ElytraFly, Speed и Velocity. Перед вайпами пресеты обновляются, конфиги лежат в облаке.</div></div>
+    <div class="qa reveal"><button>Что такое UID?<i>+</i></button><div class="qa-body">Порядковый номер твоего аккаунта: кто первый зарегистрировался — UID 1, второй — UID 2 и так далее. UID нужен для входа в лаунчер и клиент, к нему привязываются подписка и железо. Свой номер всегда виден в кабинете.</div></div>
+    <div class="qa reveal"><button>Под какие сервера делаете обходы?<i>+</i></button><div class="qa-body">Целимся в HolyWorld, FunTime, ReallyWorld и DonutSMP. Клиент в активной разработке: combat и render уже есть, серверные обходы доделываются — актуальный статус смотри в таблице выше и журнале обновлений.</div></div>
     <div class="qa reveal"><button>Как установить клиент?<i>+</i></button><div class="qa-body">Нужны Minecraft 1.21.11, Java 21 и Fabric Loader 0.19.5. Кладёшь jar в папку mods, запускаешь игру, в меню Etherial вводишь свой UID. Установка занимает минут пять, гайд есть в Discord.</div></div>
     <div class="qa reveal"><button>Сколько стоит сброс HWID?<i>+</i></button><div class="qa-body">150₽, оплачивается отдельно во вкладке Главная личного кабинета. Сброс мгновенный, количество не ограничено — каждый оплачивается отдельно.</div></div>
     <div class="qa reveal"><button>Что за роли tester / youtube / tiktok / moderator?<i>+</i></button><div class="qa-body">Роли выдаёт администратор (zxs). Tester — ранний доступ к билдам, youtube и tiktok — партнёрка для авторов, moderator — модерация чата. Роль видна рядом с ником в кабинете и IRC.</div></div>

@@ -22,6 +22,26 @@
     x.stroke();
   })();
 
+  /* intro animation (friend's frames), once per session */
+  (function () {
+    var intro = document.getElementById('intro');
+    if (!intro) return;
+    function finish() {
+      intro.classList.add('done');
+      try { sessionStorage.setItem('eth_intro', '1'); } catch (e) {}
+      setTimeout(function () { intro.classList.add('gone'); }, 850);
+    }
+    var seen = false;
+    try { seen = sessionStorage.getItem('eth_intro') === '1'; } catch (e) {}
+    if (seen || localStorage.getItem('eth_motion') === 'off') {
+      intro.classList.add('gone');
+      return;
+    }
+    intro.classList.add('play');
+    intro.addEventListener('click', finish);
+    setTimeout(finish, 3900);
+  })();
+
   /* reveal */
   var io = new IntersectionObserver(function (es) {
     es.forEach(function (e) { if (e.isIntersecting) e.target.classList.add('vis'); });

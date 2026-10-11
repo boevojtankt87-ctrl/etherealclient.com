@@ -198,6 +198,7 @@
       toast('Запись опубликована в журнале');
     });
   });
+  } // end initCabinet
 
   function refresh() {
     return S.me().then(function (u) { me = u; renderProfile(); });
