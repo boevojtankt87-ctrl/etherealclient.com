@@ -25,6 +25,16 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         return True
 
+    def end_headers(self):
+        self.send_header('Access-Control-Allow-Origin', '*');
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        super().end_headers()
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.end_headers()
+
     # ---------- helpers ----------
 
     def _json(self, obj, code=200):
@@ -99,8 +109,6 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(db.stats())
         if path == '/api/builds':
             return self._json({'builds': db.get_builds()})
-        if path == '/api/poll':
-            return self._json({'poll': db.get_poll(self._token())})
         if path == '/api/market':
             import urllib.parse as _up
             q = _up.parse_qs(urlparse(self.path).query)
@@ -210,11 +218,11 @@ class Handler(BaseHTTPRequestHandler):
         if path == '/api/ref':
             return self._json(db.ref_stats(u))
 
-        if path == '/api/poll/vote':
-            err = db.vote(self._token(), data.get('option'))
+        if path == '/api/client-launch':
+            res, err = db.client_launch(u, data.get('hwid'))
             if err:
                 return self._json({'error': err})
-            return self._json({'ok': True})
+            return self._json(res)
 
         if path == '/api/market/create':
             res, err = db.market_create(u, data.get('title'), data.get('tag'),
@@ -290,9 +298,11 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == '__main__':
+    import os as _os
     db.init()
-    srv = ThreadingHTTPServer(('127.0.0.1', PORT), Handler)
-    print('Etherial server on http://localhost:%d' % PORT)
+    port = int(_os.environ.get('PORT', '8000'))
+    srv = ThreadingHTTPServer(('0.0.0.0', port), Handler)
+    print('Etherial server on port %d' % port, flush=True)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:

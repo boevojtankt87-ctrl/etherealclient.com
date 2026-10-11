@@ -116,14 +116,6 @@ body[data-theme="arctic"] .msg p { color: #33424a; }
   border-radius: 10px; padding: 11px 13px; font-size: 13px; font-family: var(--font); outline: none;
 }
 .admin-sec input:focus { border-color: var(--acc); }
-.poll-vote { display: flex; flex-direction: column; gap: 9px; }
-.poll-vote button {
-  text-align: left; background: rgba(0, 0, 0, .3); border: 1px solid var(--line2); color: var(--txt);
-  border-radius: 11px; padding: 13px 16px; font-size: 13.5px; font-weight: 600; cursor: pointer; font-family: var(--font);
-}
-.poll-vote button:hover:not(:disabled) { border-color: var(--acc); }
-.poll-vote button:disabled { opacity: .55; cursor: default; }
-.poll-vote button.mine { border-color: var(--acc); }
 .acc-row { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; }
 .acc-dot { width: 34px; height: 34px; border-radius: 11px; background: var(--c); border: 2px solid transparent; cursor: pointer; }
 .acc-dot.active { border-color: var(--txt); }
@@ -136,6 +128,9 @@ body[data-theme="arctic"] .msg p { color: #33424a; }
 .switch.on::after { left: 22px; background: #06110c; }
 
 /* balance */
+.steps { display: grid; gap: 10px; }
+.step { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-size: 13px; color: var(--mut); line-height: 1.6; }
+.step b { display: block; color: var(--acc); font-size: 11px; letter-spacing: 1.5px; margin-bottom: 6px; }
 .amt-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
 .amt {
   background: none; border: 1px solid var(--line2); color: var(--mut);

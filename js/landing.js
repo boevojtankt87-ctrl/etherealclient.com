@@ -187,27 +187,6 @@
     }).join('');
   });
 
-  /* ---- poll results (live) ---- */
-  function paintPoll() {
-    var box = document.getElementById('pollBox');
-    if (!box) return;
-    S.poll().then(function (r) {
-      var p = r.poll;
-      if (!p) { box.innerHTML = '<div class="contact-soon">Опросов пока нет.</div>'; return; }
-      document.getElementById('pollQ').textContent = p.question;
-      var html = p.options.map(function (opt, i) {
-        var pct = p.total ? Math.round(p.counts[i] * 100 / p.total) : 0;
-        var mark = p.my === i ? ' <b style="color:var(--acc)">· твой голос</b>' : '';
-        return '<div class="poll-row"><div class="poll-top"><span>' + S.esc(opt) + mark + '</span><b>' + pct + '% · ' + p.counts[i] + '</b></div>' +
-          '<div class="poll-bar"><i style="width:' + pct + '%"></i></div></div>';
-      }).join('');
-      html += '<div style="text-align:center;margin-top:18px"><a class="btn" href="cabinet.html">Голосовать в кабинете</a></div>';
-      box.innerHTML = html;
-    });
-  }
-  paintPoll();
-  setInterval(paintPoll, 20000);
-
   /* ---- referral prefill (?ref=UID) ---- */
   var ref0 = '';
   try { ref0 = new URLSearchParams(location.search).get('ref') || ''; } catch (e) {}

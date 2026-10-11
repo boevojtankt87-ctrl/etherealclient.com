@@ -185,8 +185,8 @@ def register(nick, email, password, ref=None):
     admin_exists = cur.execute("SELECT 1 FROM users WHERE role='admin'").fetchone()
     role = 'admin' if (nick.lower() == 'zxs' and not admin_exists) else 'user'
     cur.execute('''INSERT INTO users(uid,nick,email,pass,role,hwid,created,sub_until,plan,trial_used,referred_by,ref_rewarded)
-        VALUES(?,?,?,?,?,?,?,0,NULL,0,?,0)''',
-                (counter, nick, email, hash_pass(password), role, gen_hwid(), int(time.time()), referred_by))
+        VALUES(?,?,?,?,?,NULL,?,0,NULL,0,?,0)''',
+                (counter, nick, email, hash_pass(password), role, int(time.time()), referred_by))
     user_id = cur.lastrowid
     cur.execute("UPDATE meta SET v=? WHERE k='uid_counter'", (str(counter + 1),))
     token = secrets.token_hex(24)
@@ -293,12 +293,35 @@ def activate(user_row, raw):
 def reset_hwid(user_row):
     con = connect()
     cur = con.cursor()
-    hwid = gen_hwid()
-    cur.execute('UPDATE users SET hwid=? WHERE id=?', (hwid, user_row['id']))
-    add_log(cur, user_row['id'], 'HWID сброшен (оплата 150₽) → ' + hwid)
+    cur.execute('UPDATE users SET hwid=NULL WHERE id=?', (user_row['id'],))
+    add_log(cur, user_row['id'], 'привязка HWID сброшена (оплата 150₽), привяжется при следующем запуске')
     con.commit()
     con.close()
-    return hwid
+    return 'bound-on-next-launch'
+
+
+def client_launch(user_row, hwid):
+    """HWID binds on first client launch under own login.
+    Later launches from other hardware are rejected until HWID reset."""
+    hwid = (hwid or '').strip().upper()
+    if not re.match(r'^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$', hwid):
+        return None, 'Лаунчер передал пустой HWID'
+    con = connect()
+    cur = con.cursor()
+    u = cur.execute('SELECT * FROM users WHERE id=?', (user_row['id'],)).fetchone()
+    if not u['hwid']:
+        cur.execute('UPDATE users SET hwid=? WHERE id=?', (hwid, u['id']))
+        add_log(cur, u['id'], 'железо привязано при запуске клиента: ' + hwid)
+        con.commit()
+        con.close()
+        return {'bound': True, 'hwid': hwid}, None
+    if u['hwid'] != hwid:
+        con.close()
+        return None, 'Другое железо. Сбрось HWID в кабинете (150₽) и запускай снова.'
+    add_log(cur, u['id'], 'запуск клиента подтверждён')
+    con.commit()
+    con.close()
+    return {'bound': False, 'hwid': hwid}, None
 
 
 def recover(nick, email, newpass):

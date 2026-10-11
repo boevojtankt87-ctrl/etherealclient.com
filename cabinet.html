@@ -69,10 +69,6 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="#8ea19a" stroke-width="1.8"><path d="M4 6h16v9H9l-5 4z"/></svg>
         IRC
       </button>
-      <button class="cab-tab" data-tab="poll">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#8ea19a" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>
-        Опрос
-      </button>
       <button class="cab-tab" data-tab="settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="#8ea19a" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>
         Настройки
@@ -108,7 +104,11 @@
         </div>
         <div class="profile-actions">
           <a class="btn btn-solid" href="index.html#store" style="text-align:center">Купить подписку</a>
-          <button class="btn" id="dlBtn">Скачать лоадер</button>
+          <button class="btn" id="dlBtn">Скачать клиент</button>
+        </div>
+        <div class="profile-actions" style="margin-top:10px">
+          <a class="btn" href="files/EtherealLauncher.jar" download style="text-align:center">Скачать лаунчер</a>
+          <a class="btn" href="market.html" style="text-align:center">Маркет конфигов</a>
         </div>
         <div class="key-box">
           <h4>Активация ключа</h4>
@@ -181,13 +181,6 @@
         <div class="chat-hint">ENTER — отправить · до 500 символов</div>
       </section>
 
-      <!-- POLL -->
-      <section class="cab-panel hidden" id="panel-poll">
-        <h2>Опрос</h2>
-        <p class="cab-sub">Голосуй, какой обход чинить первым. Один голос с аккаунта. Результаты видны на главной.</p>
-        <div id="cabPoll"></div>
-      </section>
-
       <!-- SETTINGS -->
       <section class="cab-panel hidden" id="panel-settings">
         <h2>Настройки</h2>
@@ -254,16 +247,6 @@
           </div>
         </div>
         <div class="admin-sec">
-          <h4>Новый опрос</h4>
-          <div class="gen-row" style="margin-bottom:10px">
-            <input id="pollQ" placeholder="Вопрос — например: какой обход обновить?" style="flex:1;min-width:220px">
-          </div>
-          <div class="gen-row">
-            <input id="pollOpts" placeholder="Варианты через запятую, от 2 до 5" style="flex:1;min-width:220px">
-            <button class="btn btn-solid" id="pollAdd">Запустить</button>
-          </div>
-        </div>
-        <div class="admin-sec">
           <h4>Пользователи</h4>
           <table class="users-table">
             <thead><tr><th>Ник</th><th>UID</th><th>Роль</th><th>Подписка</th><th></th></tr></thead>
@@ -283,6 +266,21 @@
     <div class="foot-bottom" style="border:none;padding:18px 0 0">© 2026 Etherial. All rights reserved.</div>
   </div>
 </footer>
+
+<!-- DOWNLOAD MODAL -->
+<div class="modal" id="dlModal">
+  <div class="modal-card">
+    <button class="modal-x" id="dlClose">✕</button>
+    <h3>Установка клиента</h3>
+    <p class="modal-sub">Твой UID: <b id="dlUid" style="color:var(--acc)">—</b> · понадобится в меню игры</p>
+    <div class="steps" style="grid-template-columns:1fr;margin:0 0 18px">
+      <div class="step"><b>ШАГ 1</b>Поставь Java 21 и Fabric Loader 0.19.5 под Minecraft 1.21.11.</div>
+      <div class="step"><b>ШАГ 2</b>Скачай jar ниже и положи его в папку <b>.minecraft/mods</b>.</div>
+      <div class="step"><b>ШАГ 3</b>Запусти игру, в меню Etherial введи свой UID. HWID привяжется сам при первом запуске.</div>
+    </div>
+    <a class="btn btn-solid btn-block" href="files/etherial-client.jar" download style="text-align:center">Скачать etherial-client.jar (32 МБ)</a>
+  </div>
+</div>
 
 <!-- HWID MODAL -->
 <div class="modal" id="hwidModal">

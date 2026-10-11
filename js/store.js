@@ -28,11 +28,16 @@
   }
 
   /* ---------- API backend ---------- */
+  function apiBase() {
+    var c = ((window.EthConfig || {}).API_BASE || '').trim();
+    while (c.endsWith('/')) c = c.slice(0, -1);
+    return c;
+  }
   function apiFetch(path, data) {
     var headers = { 'Content-Type': 'application/json' };
     var t = token();
     if (t) headers['Authorization'] = 'Bearer ' + t;
-    return fetch(path, {
+    return fetch(apiBase() + path, {
       method: data === undefined ? 'GET' : 'POST',
       headers: headers,
       body: data === undefined ? undefined : JSON.stringify(data)
@@ -56,9 +61,10 @@
       return apiFetch('/api/buy', { plan: plan, card_hash: hash || '', pay: pay || 'card' });
     },
     billing: function () { return apiFetch('/api/billing', {}); },
+    hwidReset: function () { return apiFetch('/api/hwid-reset', {}); },
     topup: function (t, amount, hash) { return apiFetch('/api/topup', { amount: amount, card_hash: hash }); },
     marketList: function (tag, q) {
-      return fetch('/api/market?tag=' + encodeURIComponent(tag || '') + '&q=' + encodeURIComponent(q || ''))
+      return fetch(apiBase() + '/api/market?tag=' + encodeURIComponent(tag || '') + '&q=' + encodeURIComponent(q || ''))
         .then(function (r) { return r.json(); });
     },
     marketCreate: function (t, d) { return apiFetch('/api/market/create', d); },
@@ -70,8 +76,6 @@
     post: function (t, text) { return apiFetch('/api/chat', { text: text }); },
     refStats: function () { return apiFetch('/api/ref', {}); },
     builds: function () { return apiFetch('/api/builds').then(function (r) { return r.builds || []; }); },
-    poll: function () { return apiFetch('/api/poll'); },
-    vote: function (t, opt) { return apiFetch('/api/poll/vote', { option: opt }); },
     adminOverview: function () { return apiFetch('/api/admin/overview'); },
     adminKey: function (t, plan) { return apiFetch('/api/admin/key', { plan: plan }); },
     adminRole: function (t, nick, role) { return apiFetch('/api/admin/role', { nick: nick, role: role }); },
@@ -79,7 +83,6 @@
     adminBuild: function (t, v, title, text) {
       return apiFetch('/api/admin/build', { version: v, title: title, text: text });
     },
-    adminPoll: function (t, q, opts) { return apiFetch('/api/admin/poll', { question: q, options: opts }); },
     stats: function () {
       return apiFetch('/api/stats').then(function (r) {
         return { users: r.users || 0, online: r.online || 0 };
@@ -87,10 +90,10 @@
     }
   };
 
-  /* ---------- probe + facade ---------- */
+  /* ---------- probe + facade (lazy: config.js loads after this file) ---------- */
   function probe() {
     try {
-      return fetch('/api/stats', { cache: 'no-store' })
+      return fetch(apiBase() + '/api/stats', { cache: 'no-store' })
         .then(function (r) {
           if (!r.ok) throw 0;
           return r.json();
@@ -101,12 +104,19 @@
       return Promise.resolve('local');
     }
   }
-  var backendReady = probe().then(function (mode) {
-    return mode === 'api' ? ApiBackend : window.EthStoreLocal;
-  });
+  var backendReady = null;
+  function ensureBackend() {
+    if (!backendReady) {
+      backendReady = probe().then(function (mode) {
+        return mode === 'api' ? ApiBackend : window.EthStoreLocal;
+      });
+    }
+    return backendReady;
+  }
+  document.addEventListener('DOMContentLoaded', function () { ensureBackend(); });
 
   function call(name, args, after) {
-    return backendReady.then(function (b) {
+    return ensureBackend().then(function (b) {
       return b[name].apply(b, args);
     }).then(function (r) {
       if (after) after(r);
@@ -160,11 +170,11 @@
   S.logout = function () {
     return call('logout', []).then(function (r) { clearToken(); return r; });
   };
-  ['me', 'activate', 'buy', 'billing', 'topup',
+  ['me', 'activate', 'buy', 'billing', 'hwidReset', 'topup',
    'marketCreate',
    'marketBuy', 'marketMy', 'marketConfig', 'marketToggle', 'chat', 'post',
-   'refStats', 'poll', 'vote', 'adminOverview', 'adminKey', 'adminRole',
-   'adminDelete', 'adminBuild', 'adminPoll'
+   'refStats', 'builds', 'adminOverview', 'adminKey', 'adminRole',
+   'adminDelete', 'adminBuild'
   ].forEach(function (name) {
     S[name] = function () { return call(name, T(arguments)); };
   });

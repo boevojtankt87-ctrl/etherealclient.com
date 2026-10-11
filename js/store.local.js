@@ -112,7 +112,7 @@
       var hasAdmin = Object.keys(d.users).some(function (k) { return d.users[k].role === 'admin'; });
       d.users[key] = { name: nick, pass: pwHash(key, pass), uid: uid,
         role: (key === 'zxs' && !hasAdmin) ? 'admin' : 'user',
-        email: email, hwid: rnd(4) + '-' + rnd(4) + '-' + rnd(4),
+        email: email, hwid: '',
         created: Date.now(), subUntil: 0, plan: null, balance: 0,
         referredBy: refBy, refRewarded: 0 };
       var t = token();
@@ -184,8 +184,16 @@
       save(d);
       return ok({ code: code, plan: plan });
     },
-    billing: function (t) {
+    hwidReset: function (t) {
       var d = load();
+      var u = meByToken(d, t);
+      if (!u) return ok({ error: 'auth' });
+      u.hwid = '';
+      log(d, u._key, 'привязка HWID сброшена, привяжется при следующем запуске');
+      save(d);
+      return ok({ hwid: 'bound-on-next-launch' });
+    },
+    billing: function (t) {      var d = load();
       var u = meByToken(d, t);
       if (!u) return ok({ error: 'auth' });
       save(d);

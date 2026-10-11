@@ -51,7 +51,6 @@
         p.classList.toggle('hidden', p.id !== 'panel-' + tab);
       });
       if (tab === 'irc') renderChat(true);
-      if (tab === 'poll') renderCabPoll();
       if (tab === 'balance') renderBalance();
       if (tab === 'admin') renderAdmin();
     });
@@ -100,29 +99,22 @@
       S.hwidReset().then(function (r) {
         if (r.error) { toast(r.error, true); return; }
         hwidModal.classList.remove('show');
-        refresh().then(function () { toast('HWID сброшен. Новый: ' + r.hwid); });
+        refresh().then(function () { toast('Привязка сброшена. HWID привяжется при следующем запуске клиента.'); });
       });
     });
 
-    /* loader download */
-    document.getElementById('dlBtn').addEventListener('click', function () {
-      if (S.subLeft(me) <= 0) { toast('Сначала активируй ключ — лоадер выдаётся с подпиской', true); return; }
-      var txt = [
-        'ETHERIAL CLIENT LOADER v1.0', '===========================',
-        'Nick: ' + me.name, 'UID: ' + me.uid, 'Plan: ' + (S.PLAN_LABEL[me.plan] || me.plan), '',
-        'MC 1.21.11 | Fabric Loader 0.19.5 | Java 21', '',
-        'INSTALL:', '1. Install Java 21 and Fabric Loader 0.19.5 for MC 1.21.11',
-        '2. Put etherial-1.0.jar into .minecraft/mods',
-        '3. Launch the game, enter your UID in the Etherial menu: ' + me.uid,
-        '4. RSHIFT in game opens ClickGUI', '',
-        'Support: Discord, mention your UID #' + me.uid
-      ].join('\n');
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([txt], { type: 'text/plain;charset=utf-8' }));
-      a.download = 'etherial-loader-uid-' + me.uid + '.txt';
-      a.click();
-      toast('Лоадер скачан. Следуй инструкции из файла.');
-    });
+  /* loader download: real client jar from the site files */
+  document.getElementById('dlBtn').addEventListener('click', function () {
+    if (S.subLeft(me) <= 0) { toast('Сначала активируй ключ — клиент выдаётся с подпиской', true); return; }
+    document.getElementById('dlUid').textContent = '#' + me.uid;
+    document.getElementById('dlModal').classList.add('show');
+  });
+  document.getElementById('dlClose').addEventListener('click', function () {
+    document.getElementById('dlModal').classList.remove('show');
+  });
+  document.getElementById('dlModal').addEventListener('click', function (e) {
+    if (e.target.id === 'dlModal') e.target.classList.remove('show');
+  });
 
     document.getElementById('logoutBtn').addEventListener('click', function () {
       S.logout().then(function () { location.reload(); });
@@ -206,19 +198,6 @@
       toast('Запись опубликована в журнале');
     });
   });
-  var pollAdd = document.getElementById('pollAdd');
-  if (pollAdd) pollAdd.addEventListener('click', function () {
-    S.adminPoll(
-      document.getElementById('pollQ').value,
-      document.getElementById('pollOpts').value
-    ).then(function (r) {
-      if (r.error) { toast(r.error, true); return; }
-      document.getElementById('pollQ').value = '';
-      document.getElementById('pollOpts').value = '';
-      toast('Опрос запущен, старый закрыт');
-    });
-  });
-  }
 
   function refresh() {
     return S.me().then(function (u) { me = u; renderProfile(); });
@@ -233,7 +212,7 @@
     rb.className = 'role-badge ' + me.role;
     document.getElementById('pUid').textContent = '#' + me.uid;
     document.getElementById('pEmail').textContent = me.email || '—';
-    document.getElementById('pHwid').textContent = me.hwid;
+    document.getElementById('pHwid').textContent = me.hwid || 'не привязан';
     document.getElementById('pDate').textContent = new Date(me.created).toLocaleDateString('ru-RU');
     document.getElementById('pDays').textContent =
       Math.floor((Date.now() - me.created) / 864e5) + ' дн. с нами';
@@ -276,32 +255,6 @@
       if (r.error) { toast(r.error, true); return; }
       inp.value = '';
       renderChat(true);
-    });
-  }
-
-  /* ---------- poll (vote) ---------- */
-  function renderCabPoll() {
-    var box = document.getElementById('cabPoll');
-    S.poll().then(function (r) {
-      var p = r.poll;
-      if (!p) { box.innerHTML = '<div class="contact-soon">Опросов пока нет.</div>'; return; }
-      var html = '<h4 style="font-size:15px;margin-bottom:14px">' + S.esc(p.question) + '</h4><div class="poll-vote">';
-      html += p.options.map(function (opt, i) {
-        var pct = p.total ? Math.round(p.counts[i] * 100 / p.total) : 0;
-        var cls = p.my === i ? ' class="mine"' : '';
-        var dis = p.my !== null && p.my !== undefined ? ' disabled' : '';
-        var tail = ' — ' + pct + '% (' + p.counts[i] + ')';
-        return '<button data-opt="' + i + '"' + cls + dis + '>' + S.esc(opt) + tail + (p.my === i ? ' · твой голос' : '') + '</button>';
-      }).join('') + '</div>';
-      box.innerHTML = html;
-      box.querySelectorAll('button[data-opt]').forEach(function (b) {
-        b.addEventListener('click', function () {
-          S.vote(+b.dataset.opt).then(function (res) {
-            if (res.error) toast(res.error, true);
-            renderCabPoll();
-          });
-        });
-      });
     });
   }
 

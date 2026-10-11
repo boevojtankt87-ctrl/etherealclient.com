@@ -1,6 +1,9 @@
 /* Etherial — site config. Fill in real links before release. */
 window.EthConfig = {
   LAST_UPDATE: '11.10.26',
+  /* Shared backend: paste your hosted API root here, e.g. 'https://etherial-api.onrender.com'.
+     Empty = use same-origin /api (local server.py) or local demo on static hosting. */
+  API_BASE: '',
   CONTACTS: {
     discord: '',   // e.g. 'https://discord.gg/etherial'
     telegram: '',  // e.g. 'https://t.me/etherial_client'
