@@ -1,0 +1,55 @@
+/* Etherial — market */
+#bg { position: fixed; inset: 0; z-index: 0; opacity: .45; pointer-events: none; }
+.mk-controls { margin: 26px 0 20px; }
+.mk-tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.stab {
+  background: none; border: 1px solid var(--line2); color: var(--mut);
+  font-family: var(--font); font-size: 13px; font-weight: 600;
+  padding: 10px 24px; border-radius: 20px; cursor: pointer;
+}
+.stab.active { background: var(--acc); border-color: var(--acc); color: #06110c; }
+.mk-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.mk-tags { display: flex; gap: 7px; flex-wrap: wrap; }
+.mtag {
+  background: none; border: 1px solid var(--line2); color: var(--mut);
+  font-family: var(--font); font-size: 12px; font-weight: 600;
+  padding: 8px 15px; border-radius: 18px; cursor: pointer;
+}
+.mtag.active { border-color: var(--acc); color: var(--txt); }
+.mk-search {
+  background: var(--field); border: 1px solid var(--line2); color: var(--txt);
+  padding: 11px 16px; border-radius: 12px; font-size: 13.5px; font-family: var(--font);
+  outline: none; min-width: 200px; flex: 1;
+}
+.mk-search:focus { border-color: var(--acc); }
+.mk-row .btn { margin-left: auto; }
+.mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; padding-bottom: 30px; }
+.lot { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 22px; display: flex; flex-direction: column; transition: border-color .2s, transform .2s; }
+.lot:hover { border-color: var(--line2); transform: translateY(-3px); }
+.lot.off { opacity: .55; }
+.lot-tag { font-size: 10.5px; font-weight: 800; letter-spacing: 1.5px; color: var(--acc); }
+.lot h3 { font-size: 15.5px; font-weight: 800; margin: 8px 0 4px; letter-spacing: -.2px; }
+.lot .seller { font-size: 12px; color: var(--dim); }
+.lot .seller b { color: var(--mut); }
+.lot-foot { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+.lot-price { font-size: 20px; font-weight: 800; }
+.lot-sales { font-size: 11px; color: var(--dim); margin-left: auto; }
+.lot-foot .btn { padding: 8px 16px; font-size: 12.5px; }
+.lot-actions { display: flex; gap: 8px; margin-top: 14px; }
+.empty { grid-column: 1 / -1; text-align: center; border: 1px dashed var(--line2); border-radius: var(--r); padding: 44px 20px; color: var(--mut); font-size: 13.5px; line-height: 1.7; }
+.empty .btn { margin-top: 14px; }
+#viewModal pre {
+  background: var(--deep); border: 1px solid var(--line); border-radius: 12px;
+  padding: 16px 18px; font-size: 12px; line-height: 1.6; overflow: auto; max-height: 320px;
+  white-space: pre-wrap; word-break: break-all; color: var(--txt);
+  font-family: var(--font);
+}
+.modal-card textarea {
+  width: 100%; margin-top: 6px; background: var(--field); border: 1px solid var(--line2);
+  border-radius: 11px; padding: 12px 14px; color: var(--txt); font-size: 13px; outline: none;
+  font-family: var(--font); resize: vertical;
+}
+.modal-card textarea:focus { border-color: var(--acc); }
+@media (max-width: 900px) {
+  .mk-row .btn { margin-left: 0; width: 100%; }
+}

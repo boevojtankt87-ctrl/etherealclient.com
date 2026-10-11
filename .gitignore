@@ -1,0 +1,15 @@
+# python
+server/etherial.db
+server/__pycache__/
+__pycache__/
+*.pyc
+
+# java
+launcher/out/
+launcher/dist/
+*.class
+*.jar
+
+# system
+.DS_Store
+Thumbs.db

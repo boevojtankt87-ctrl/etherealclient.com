@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Маркет конфигов — Etherial Client</title>
+<link rel="icon" type="image/png" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/market.css">
+</head>
+<body>
+<canvas id="bg"></canvas>
+
+<header>
+  <div class="header-in">
+    <a href="index.html" class="logo"><img src="assets/logo.png" alt="Etherial">ETHERIAL</a>
+    <nav class="nav" id="nav">
+      <a href="index.html">Главная</a>
+      <a href="market.html">Маркет</a>
+      <a href="index.html#store">Тарифы</a>
+      <a href="cabinet.html">Кабинет</a>
+    </nav>
+    <div class="header-right">
+      <span class="ver-tag" id="mBal">0 ₽</span>
+      <button class="btn btn-sm btn-solid" id="headAuth">Войти</button>
+      <button class="burger" id="burger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" style="padding-top:44px">
+  <span class="kicker">// МАРКЕТ КОНФИГОВ</span>
+  <h1 style="font-size:clamp(24px,3.4vw,34px);font-weight:800;letter-spacing:-1px;margin:14px 0 4px">Пресеты от игроков</h1>
+  <p style="color:var(--mut);font-size:14px;max-width:640px;line-height:1.65">Выставляй свои конфиги, покупай чужие. Оплата — с баланса (пополняется в кабинете), продавцу уходит 90% цены. Текст конфига открывается сразу после покупки.</p>
+
+  <div class="mk-controls">
+    <div class="mk-tabs" id="mkTabs">
+      <button class="stab active" data-mtab="all">Витрина</button>
+      <button class="stab" data-mtab="mine">Мои лоты</button>
+      <button class="stab" data-mtab="bought">Купленные</button>
+    </div>
+    <div class="mk-row">
+      <div class="mk-tags" id="mkTags"></div>
+      <input class="mk-search" id="mkSearch" placeholder="Поиск по названию…">
+      <button class="btn btn-solid" id="mkCreate">Выставить лот</button>
+    </div>
+  </div>
+
+  <div class="mk-grid" id="mkGrid"></div>
+</main>
+
+<footer>
+  <div class="wrap foot-in">
+    <div class="foot-logo">Etherial</div>
+    <div class="foot-links"><a href="index.html#store">Тарифы</a><a href="market.html">Маркет</a><a href="cabinet.html">Кабинет</a></div>
+    <div class="foot-bottom" style="border:none;padding:18px 0 0">© 2026 Etherial. All rights reserved.</div>
+  </div>
+</footer>
+
+<!-- CREATE MODAL -->
+<div class="modal" id="mkModal">
+  <div class="modal-card">
+    <button class="modal-x" id="mkClose">✕</button>
+    <h3>Новый лот</h3>
+    <p class="modal-sub">Конфиг увидят только покупатели. Комиссия маркета — 10%.</p>
+    <label>Название<input type="text" id="mkTitle" maxlength="80" placeholder="Aura HolyWorld — легит 3.2 блока"></label>
+    <label>Сервер
+      <select id="mkTag" style="width:100%;margin-top:6px;background:var(--field);border:1px solid var(--line2);color:var(--txt);border-radius:11px;padding:12px 14px;font-size:14px;font-family:var(--font);outline:none">
+        <option>HolyWorld</option><option>FunTime</option><option>ReallyWorld</option><option>DonutSMP</option><option>Universal</option>
+      </select>
+    </label>
+    <label>Цена, ₽<input type="text" id="mkPrice" inputmode="numeric" maxlength="6" placeholder="10–100000"></label>
+    <label>Описание<input type="text" id="mkDescr" maxlength="2000" placeholder="под что настроено, дистанция, особенности"></label>
+    <label>Текст конфига<textarea id="mkConfig" rows="6" maxlength="20000" placeholder="вставь содержимое .json конфига"></textarea></label>
+    <div class="auth-err" id="mkErr"></div>
+    <button class="btn btn-solid btn-block" id="mkSubmit">Выставить на продажу</button>
+  </div>
+</div>
+
+<!-- VIEW MODAL -->
+<div class="modal" id="viewModal">
+  <div class="modal-card wide" style="max-width:640px">
+    <button class="modal-x" id="viewClose">✕</button>
+    <h3 id="viewTitle" style="text-align:left"></h3>
+    <p class="modal-sub" id="viewMeta" style="text-align:left"></p>
+    <p style="font-size:13.5px;color:var(--mut);line-height:1.65;margin-bottom:14px" id="viewDescr"></p>
+    <pre id="viewConfig"></pre>
+    <button class="btn btn-block" id="viewCopy" style="margin-top:14px">Копировать конфиг</button>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<script src="js/store.local.js"></script>
+<script src="js/store.js"></script>
+<script src="js/common.js"></script>
+<script src="js/market.js"></script>
+</body>
+</html>

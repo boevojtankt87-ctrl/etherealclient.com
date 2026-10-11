@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Кабинет — Etherial Client</title>
+<link rel="icon" type="image/png" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/cabinet.css">
+</head>
+<body>
+<header>
+  <div class="header-in">
+    <a href="index.html" class="logo"><img src="assets/logo.png" alt="Etherial">ETHERIAL</a>
+    <nav class="nav" id="nav">
+      <a href="index.html#top">Главная</a>
+      <a href="market.html">Маркет</a>
+      <a href="index.html#store">Тарифы</a>
+      <a href="index.html#contacts">Контакты</a>
+      <a href="cabinet.html">Кабинет</a>
+    </nav>
+    <div class="header-right">
+      <a class="btn btn-sm" href="index.html">На сайт</a>
+      <button class="burger" id="burger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" style="padding-top:44px">
+  <span class="kicker">// ЛИЧНЫЙ КАБИНЕТ</span>
+  <h1 style="font-size:clamp(24px,3.4vw,34px);font-weight:800;letter-spacing:-1px;margin:14px 0 4px">UID, ключи и лоадер</h1>
+
+  <!-- GUEST -->
+  <div id="guestBox" class="hidden">
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button data-gmode="reg" class="active">Регистрация</button>
+        <button data-gmode="login">Вход</button>
+      </div>
+      <label>Ник<input type="text" id="gName" maxlength="16" placeholder="3-16 символов: A-Z, 0-9, _"></label>
+      <label id="gEmailWrap">Почта<input type="text" id="gEmail" maxlength="64" placeholder="для восстановления доступа"></label>
+      <label>Пароль<input type="password" id="gPass" placeholder="минимум 4 символа"></label>
+      <label class="remember" style="display:flex;align-items:center;gap:9px;font-size:13px;cursor:pointer"><input type="checkbox" id="gRemember" checked style="width:16px;height:16px;accent-color:var(--acc)"> Запомнить меня</label>
+      <div class="auth-err" id="gErr"></div>
+      <button class="btn btn-solid btn-block" id="gSubmit">Зарегистрироваться</button>
+      <p style="font-size:12px;color:var(--mut);margin-top:14px;line-height:1.6">UID выдаётся по порядку: второй аккаунт — UID 2. Ник <b>zxs</b>, зарегистрированный первым, получает UID 1 и права администратора.</p>
+    </div>
+  </div>
+
+  <!-- CABINET -->
+  <div id="cabLayout" class="cab-layout hidden">
+    <aside class="cab-side">
+      <div class="cab-me">
+        <div class="cab-ava" id="sideAva">E</div>
+        <div><b id="sideName">—</b><span id="sideUid">—</span></div>
+      </div>
+      <button class="cab-tab active" data-tab="profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#8ea19a" stroke-width="1.8"><path d="M4 11l8-7 8 7M6 10v9h12v-9"/></svg>
+        Главная
+      </button>
+      <button class="cab-tab" data-tab="balance">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#8ea19a" stroke-width="1.8"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18M16 15h2"/></svg>
+        Баланс
+      </button>
+      <button class="cab-tab" data-tab="irc">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#8ea19a" stroke-width="1.8"><path d="M4 6h16v9H9l-5 4z"/></svg>
+        IRC
+      </button>
+      <button class="cab-tab" data-tab="poll">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#8ea19a" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>
+        Опрос
+      </button>
+      <button class="cab-tab" data-tab="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#8ea19a" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>
+        Настройки
+      </button>
+      <button class="cab-tab" data-tab="admin">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#8ea19a" stroke-width="1.8"><path d="M12 3l7 3v5c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/></svg>
+        Админ
+      </button>
+      <button class="cab-exit" id="logoutBtn">Выйти</button>
+    </aside>
+
+    <div class="cab-main">
+      <!-- PROFILE -->
+      <section class="cab-panel" id="panel-profile">
+        <h2>Главная</h2>
+        <p class="cab-sub">Данные твоего аккаунта</p>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+          <div class="cab-ava" id="pAva" style="width:52px;height:52px;font-size:22px">E</div>
+          <div>
+            <div style="font-size:18px;font-weight:800" id="pName">—</div>
+            <div style="font-size:12.5px;color:var(--mut);margin-top:2px">UID <b id="pUid" style="color:var(--acc)">—</b><button class="mini-btn" id="copyUid">копировать</button></div>
+          </div>
+          <span class="role-badge" id="pSubBadge" style="margin-left:auto">—</span>
+        </div>
+        <div class="kv">
+          <div class="kv-row"><span class="kv-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 8l9 6 9-6"/></svg></span><span>Почта</span><b id="pEmail">—</b></div>
+          <div class="kv-row"><span class="kv-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18"/></svg></span><span>Подписка</span><b id="pSub">—</b></div>
+          <div class="kv-row"><span class="kv-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><span>Срок действия</span><b id="pSubExp">—</b></div>
+          <div class="kv-row"><span class="kv-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg></span><span>Идентификатор устройства</span><b id="pHwid">—</b></div>
+          <div class="kv-row"><span class="kv-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M4 9a8 8 0 0114-3l2 2M20 15a8 8 0 01-14 3l-2-2M20 4v4h-4M4 20v-4h4"/></svg></span><span>Сбросы HWID</span><b class="dim">0 включено · сброс 150₽</b></div>
+          <div class="kv-row"><span class="kv-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span><span>Дата регистрации</span><b id="pDate">—</b></div>
+          <div class="kv-row"><span class="kv-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.5 3-5.5 7-5.5s7 2 7 5.5"/></svg></span><span>Роль</span><b><span class="role-badge" id="roleBadge">user</span></b></div>
+        </div>
+        <div class="profile-actions">
+          <a class="btn btn-solid" href="index.html#store" style="text-align:center">Купить подписку</a>
+          <button class="btn" id="dlBtn">Скачать лоадер</button>
+        </div>
+        <div class="key-box">
+          <h4>Активация ключа</h4>
+          <div class="key-row">
+            <input id="keyInput" placeholder="ETHR-XXXX-XXXX">
+            <button class="btn btn-solid" id="activateBtn">Активировать</button>
+          </div>
+        </div>
+        <div class="key-box">
+          <h4>Сброс HWID — 150₽</h4>
+          <div class="key-row">
+            <button class="btn btn-block" id="hwidBtn">Оплатить и сбросить HWID</button>
+          </div>
+        </div>
+        <div class="key-box">
+          <h4>Реферальная программа</h4>
+          <p style="font-size:12.5px;color:var(--mut);margin-bottom:12px;line-height:1.6">+3 дня подписки за каждого приглашённого, который активировал ключ. Бонус начисляется автоматически.</p>
+          <div class="key-row">
+            <input id="refLink" readonly>
+            <button class="btn" id="refCopy">Копировать</button>
+          </div>
+          <p style="font-size:12.5px;color:var(--mut);margin-top:12px" id="refStats">—</p>
+        </div>
+        <div class="log-box"><h4>ЖУРНАЛ</h4><div id="cabLog"></div></div>
+      </section>
+
+      <!-- BALANCE -->
+      <section class="cab-panel hidden" id="panel-balance">
+        <h2>Баланс</h2>
+        <p class="cab-sub">Пополняй картой — трать на маркете и подписки. Одна карта — один аккаунт.</p>
+        <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:20px">
+          <b id="balAmount" style="font-size:42px;font-weight:800;letter-spacing:-1px">0 ₽</b>
+        </div>
+        <div class="key-box">
+          <h4>Пополнить баланс</h4>
+          <div class="amt-row" id="topAmounts">
+            <button class="amt" data-amt="300">300 ₽</button>
+            <button class="amt" data-amt="550">550 ₽</button>
+            <button class="amt" data-amt="1000">1000 ₽</button>
+            <button class="amt" data-amt="2000">2000 ₽</button>
+          </div>
+          <div class="key-row" style="margin-bottom:10px">
+            <input id="topAmount" inputmode="numeric" maxlength="6" placeholder="Сумма 50–100000 ₽">
+          </div>
+          <div class="key-row" style="margin-bottom:10px">
+            <input id="topCard" inputmode="numeric" maxlength="19" placeholder="Номер карты 0000 0000 0000 0000">
+          </div>
+          <div class="key-row" style="margin-bottom:12px">
+            <input id="topExp" inputmode="numeric" maxlength="5" placeholder="ММ/ГГ">
+            <input id="topCvc" type="password" inputmode="numeric" maxlength="3" placeholder="CVC">
+          </div>
+          <div class="auth-err" id="topErr"></div>
+          <div class="key-row">
+            <button class="btn btn-solid btn-block" id="topSubmit">Пополнить</button>
+          </div>
+          <p style="font-size:11.5px;color:var(--dim);margin-top:10px">Демо: номер никуда не уходит, хранится только хэш. Карта: 4242 4242 4242 4242.</p>
+        </div>
+        <div class="log-box"><h4>ИСТОРИЯ</h4><div id="txLog"></div></div>
+      </section>
+
+      <!-- IRC -->
+      <section class="cab-panel hidden" id="panel-irc">
+        <h2>IRC</h2>
+        <p class="cab-sub">Общий чат владельцев. Роль и UID видны рядом с ником. Демо-режим: сообщения живут в этом браузере.</p>
+        <div class="chat-box" id="chatBox"></div>
+        <div class="chat-row">
+          <input id="chatInput" maxlength="500" placeholder="Написать в общий чат…">
+          <button class="btn btn-solid" id="chatSend">Отправить</button>
+        </div>
+        <div class="chat-hint">ENTER — отправить · до 500 символов</div>
+      </section>
+
+      <!-- POLL -->
+      <section class="cab-panel hidden" id="panel-poll">
+        <h2>Опрос</h2>
+        <p class="cab-sub">Голосуй, какой обход чинить первым. Один голос с аккаунта. Результаты видны на главной.</p>
+        <div id="cabPoll"></div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="cab-panel hidden" id="panel-settings">
+        <h2>Настройки</h2>
+        <p class="cab-sub">Оформление сайта. Применяется мгновенно и запоминается.</p>
+        <div class="set-group">
+          <h4>Тема</h4>
+          <p>Etherial Dark — фирменная. Mono — строгая чёрно-белая.</p>
+          <div class="theme-pick cols3">
+            <button class="theme-card" data-theme="etherial"><div class="theme-prev tp-dark"></div><b>Etherial Dark</b><span>фирменная</span></button>
+            <button class="theme-card" data-theme="mono"><div class="theme-prev tp-mono"></div><b>Mono</b><span>чёрно-белая</span></button>
+            <button class="theme-card" data-theme="crimson"><div class="theme-prev tp-crimson"></div><b>Crimson</b><span>тёмно-красная</span></button>
+            <button class="theme-card" data-theme="toxic"><div class="theme-prev tp-toxic"></div><b>Toxic</b><span>кислотный лайм</span></button>
+            <button class="theme-card" data-theme="royal"><div class="theme-prev tp-royal"></div><b>Royal</b><span>фиолет + золото</span></button>
+            <button class="theme-card" data-theme="arctic"><div class="theme-prev tp-arctic"></div><b>Arctic</b><span>светлая</span></button>
+          </div>
+        </div>
+        <div class="set-group">
+          <h4>Акцентный цвет</h4>
+          <p>Как настройка GUI в клиенте: свой акцент для кнопок и подсветки.</p>
+          <div class="acc-row">
+            <button class="acc-dot" data-color="#4eba8e" style="--c:#4eba8e" title="mint"></button>
+            <button class="acc-dot" data-color="#ededed" style="--c:#ededed" title="white"></button>
+            <button class="acc-dot" data-color="#4aa8ff" style="--c:#4aa8ff" title="blue"></button>
+            <button class="acc-dot" data-color="#ff5147" style="--c:#ff5147" title="red"></button>
+            <button class="acc-dot" data-color="#d8b34a" style="--c:#d8b34a" title="gold"></button>
+            <button class="acc-dot" data-color="#b8ff29" style="--c:#b8ff29" title="toxic"></button>
+            <button class="acc-dot" data-color="#a678ff" style="--c:#a678ff" title="royal"></button>
+            <button class="acc-dot" data-color="#0284c7" style="--c:#0284c7" title="arctic"></button>
+          </div>
+          <div class="acc-custom">Свой цвет: <input type="color" id="accCustom" value="#4eba8e"></div>
+        </div>
+        <div class="set-group">
+          <div class="switch-row"><span>Анимации интерфейса</span><button class="switch on" id="motionSw"></button></div>
+        </div>
+        <button class="btn" id="themeReset">Сбросить оформление</button>
+      </section>
+
+      <!-- ADMIN -->
+      <section class="cab-panel hidden" id="panel-admin">
+        <h2>Админ</h2>
+        <p class="cab-sub">Только для роли admin. Роли moderator / tester / youtube / tiktok, генерация ключей.</p>
+        <div class="stat-row">
+          <div class="stat"><b id="stUsers">0</b><span>users</span></div>
+          <div class="stat"><b id="stActive">0</b><span>active subs</span></div>
+          <div class="stat"><b id="stKeys">0</b><span>unused keys</span></div>
+        </div>
+        <div class="admin-sec">
+          <h4>Сгенерировать ключ</h4>
+          <div class="gen-row">
+            <select id="genPlan"><option value="D30">30 дней</option><option value="D90">90 дней</option><option value="D180">180 дней</option></select>
+            <button class="btn btn-solid" id="genKeyBtn">Сгенерировать</button>
+          </div>
+          <div class="gen-out" id="genOut"></div>
+        </div>
+        <div class="admin-sec">
+          <h4>Новая запись в журнал обновлений</h4>
+          <div class="gen-row" style="margin-bottom:10px">
+            <input id="buildVer" placeholder="v1.5.0" style="max-width:110px">
+            <input id="buildTitle" placeholder="Заголовок" style="flex:1;min-width:180px">
+          </div>
+          <div class="gen-row">
+            <input id="buildText" placeholder="Что изменилось — 1-2 предложения" style="flex:1;min-width:220px">
+            <button class="btn btn-solid" id="buildAdd">Опубликовать</button>
+          </div>
+        </div>
+        <div class="admin-sec">
+          <h4>Новый опрос</h4>
+          <div class="gen-row" style="margin-bottom:10px">
+            <input id="pollQ" placeholder="Вопрос — например: какой обход обновить?" style="flex:1;min-width:220px">
+          </div>
+          <div class="gen-row">
+            <input id="pollOpts" placeholder="Варианты через запятую, от 2 до 5" style="flex:1;min-width:220px">
+            <button class="btn btn-solid" id="pollAdd">Запустить</button>
+          </div>
+        </div>
+        <div class="admin-sec">
+          <h4>Пользователи</h4>
+          <table class="users-table">
+            <thead><tr><th>Ник</th><th>UID</th><th>Роль</th><th>Подписка</th><th></th></tr></thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+  <p style="font-size:12px;color:var(--dim);margin-top:14px" id="pDays"></p>
+</main>
+
+<footer>
+  <div class="wrap foot-in">
+    <div class="foot-logo">Etherial</div>
+    <div class="foot-links"><a href="index.html#store">Тарифы</a><a href="market.html">Маркет</a><a href="index.html#contacts">Контакты</a><a href="index.html#faq">FAQ</a></div>
+    <div class="foot-bottom" style="border:none;padding:18px 0 0">© 2026 Etherial. All rights reserved.</div>
+  </div>
+</footer>
+
+<!-- HWID MODAL -->
+<div class="modal" id="hwidModal">
+  <div class="modal-card">
+    <button class="modal-x" id="hwidClose">✕</button>
+    <h3>Сброс HWID — 150₽</h3>
+    <p class="modal-sub">Старая привязка железа сгорит, подписка останется. Новый HWID привяжется при следующем запуске лоадера.</p>
+    <button class="btn btn-solid btn-block" id="hwidConfirm">Оплатить 150₽ и сбросить</button>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<script src="js/store.local.js"></script>
+<script src="js/store.js"></script>
+<script src="js/common.js"></script>
+<script src="js/pay.js"></script>
+<script src="js/cabinet.js"></script>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Etherial Client — чит для Minecraft 1.21.11 | HolyWorld, FunTime, ReallyWorld, DonutSMP</title>
+<meta name="description" content="Etherial Client — приватный клиент для Minecraft 1.21.11 (Fabric). Обходы под HolyWorld, FunTime, ReallyWorld и DonutSMP. Порядковые UID, облачные конфиги, IRC.">
+<link rel="icon" type="image/png" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+<canvas id="bg"></canvas>
+
+<header>
+  <div class="header-in">
+    <a href="#top" class="logo"><img src="assets/logo.png" alt="Etherial">ETHERIAL</a>
+    <nav class="nav" id="nav">
+      <a href="#top">Главная</a>
+      <a href="market.html">Маркет</a>
+      <a href="#store">Тарифы</a>
+      <a href="#contacts">Контакты</a>
+      <a href="cabinet.html">Кабинет</a>
+    </nav>
+    <div class="header-right">
+      <button class="btn btn-sm btn-solid" id="headAuth">Войти</button>
+      <button class="burger" id="burger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+<!-- HERO -->
+<section class="hero wrap">
+  <span class="kicker reveal">ETHERIAL CLIENT · 1.21.11 · FABRIC</span>
+  <h1 class="reveal">Играй на анархии<br>вместе с <em>Etherial</em></h1>
+  <p class="hero-sub reveal">Приватный клиент с отдельными обходами под каждый сервер. KillAura, ElytraFly и ESP настраиваются пресетом в два клика и обновляются под вайпы.</p>
+  <div class="srv-row reveal">
+    <span class="srv"><i></i>HOLYWORLD</span>
+    <span class="srv"><i></i>FUNTIME</span>
+    <span class="srv"><i></i>REALLYWORLD</span>
+    <span class="srv"><i></i>DONUTSMP</span>
+  </div>
+  <div class="hero-cta reveal">
+    <a class="btn btn-solid btn-lg" href="#store">Выбрать подписку</a>
+    <a class="btn btn-lg" href="cabinet.html">Открыть кабинет</a>
+  </div>
+</section>
+
+<!-- ADVANTAGES -->
+<section class="section wrap">
+  <div class="sec-center reveal">
+    <span class="kicker">Преимущества</span>
+    <h2>Что ты получишь после покупки клиента</h2>
+  </div>
+  <div class="adv-grid">
+    <div class="adv reveal">
+      <div class="adv-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M12 3l7 3v5c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <b>Обходы под сервера</b>
+      <p>Отдельные пресеты Aura, ElytraFly и Speed под HolyWorld, FunTime, ReallyWorld и DonutSMP. Обновляем перед вайпами, конфиги лежат в облаке.</p>
+    </div>
+    <div class="adv reveal">
+      <div class="adv-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M4 6h16v9H9l-5 4z"/><circle cx="9" cy="11" r=".9" fill="currentColor"/><circle cx="13" cy="11" r=".9" fill="currentColor"/><circle cx="17" cy="11" r=".9" fill="currentColor"/></svg></div>
+      <b>Поддержка и IRC</b>
+      <p>Русскоязычная поддержка в Discord и общий IRC-чат прямо в кабинете: помощь с установкой, настройкой пресетов и биндов.</p>
+    </div>
+    <div class="adv reveal">
+      <div class="adv-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="3" y="13" width="8" height="5" rx="2"/></svg></div>
+      <b>Оптимизация</b>
+      <p>Модуль Optimizer, свой батч-рендер и лёгкие шрифты: клиент не просаживает FPS и запускается даже на слабых компьютерах.</p>
+    </div>
+  </div>
+  <div class="chips reveal">
+    <span class="chip">Круглосуточная поддержка</span>
+    <span class="chip">Регулярные обновления</span>
+    <span class="chip">Гибкая настройка</span>
+    <span class="chip">Боты и AutoBuy</span>
+  </div>
+  <div class="compare reveal">
+    <div class="cmp-row cmp-head"><span></span><b>Etherial</b><span>Бесплатные клиенты</span></div>
+    <div class="cmp-row"><span>Обходы под 4 проекта</span><b class="yes">Да</b><span class="no">1–2 сервера</span></div>
+    <div class="cmp-row"><span>Обновления под вайпы</span><b class="yes">В день вайпа</b><span class="no">Как повезёт</span></div>
+    <div class="cmp-row"><span>Маркет конфигов</span><b class="yes">Да</b><span class="no">Нет</span></div>
+    <div class="cmp-row"><span>Сброс HWID</span><b class="yes">150₽, сразу</b><span class="no">Нет</span></div>
+    <div class="cmp-row"><span>Поддержка и IRC</span><b class="yes">24/7</b><span class="no">Нет</span></div>
+  </div>
+</section>
+
+<!-- BYPASS STATUS -->
+<section class="section wrap">
+  <div class="sec-center reveal">
+    <span class="kicker">Статус обходов</span>
+    <h2>Что работает прямо сейчас</h2>
+    <p>Честный статус по каждому проекту. Обновляем после каждого билда — без «всё работает», когда это не так.</p>
+  </div>
+  <div class="status-grid reveal" id="bypassGrid"></div>
+</section>
+
+<!-- BUILDS -->
+<section class="section wrap">
+  <div class="sec-center reveal">
+    <span class="kicker">Журнал обновлений</span>
+    <h2>Каждый билд — по датам</h2>
+    <p>Не «скоро будет», а что уже вышло. Новые записи публикует админ.</p>
+  </div>
+  <div class="timeline reveal" id="buildsList"></div>
+</section>
+
+<!-- POLL -->
+<section class="section wrap">
+  <div class="sec-center reveal">
+    <span class="kicker">Голосование</span>
+    <h2 id="pollQ">Что обновим следующим</h2>
+    <p>Владельцы решают, какой обход чинить первым. Голосовать — в кабинете, результат здесь, в реальном времени.</p>
+  </div>
+  <div class="poll reveal" id="pollBox"></div>
+</section>
+
+<!-- STATS -->
+<section class="section wrap">
+  <div class="sec-center reveal">
+    <span class="kicker">Статистика</span>
+    <h2>Цифры в реальном времени</h2>
+  </div>
+  <div class="stats reveal">
+    <div class="stat"><b id="statUsers">0</b><span>Пользователей всего</span></div>
+    <div class="stat"><b id="statUpdate">11.10.26</b><span>Последнее обновление</span></div>
+    <div class="stat"><b id="statOnline">0</b><span>Сейчас в сети</span></div>
+  </div>
+</section>
+
+<!-- STORE -->
+<section id="store" class="section wrap">
+  <div class="sec-center reveal">
+    <span class="kicker">Витрина</span>
+    <h2>Выбирай то, что нужно именно тебе</h2>
+    <p>Подписки и услуга сброса HWID. Ключ формата ETHR-XXXX-XXXX выдаётся сразу после оплаты.</p>
+  </div>
+  <div class="store-tabs reveal">
+    <button class="stab active" data-sfilter="all">Все</button>
+    <button class="stab" data-sfilter="sub">Подписки</button>
+    <button class="stab" data-sfilter="svc">Услуги</button>
+  </div>
+  <div class="store-grid">
+    <div class="product reveal" data-cat="sub">
+      <div class="product-vis"><small>ПОДПИСКА</small><b>7 ДНЕЙ</b></div>
+      <div class="product-body"><h3>Подписка Etherial 7 дней</h3><p>Неделя игры: проверить обходы на своём сервере. Скидка для новых аккаунтов.</p>
+      <div class="product-price"><s class="old-price">150 ₽</s> 100 ₽</div><button class="btn btn-block" data-buy="D7">Купить</button></div>
+    </div>
+    <div class="product reveal" data-cat="sub">
+      <div class="product-vis"><small>ПОДПИСКА</small><b>30 ДНЕЙ</b></div>
+      <div class="product-body"><h3>Подписка Etherial 30 дней</h3><p>Превосходство над игроками на 30 дней. Все обходы и обновления.</p>
+      <div class="product-price">300 ₽</div><button class="btn btn-block" data-buy="D30">Купить</button></div>
+    </div>
+    <div class="product reveal" data-cat="sub">
+      <div class="product-vis"><small>ПОДПИСКА</small><b>90 ДНЕЙ</b></div>
+      <div class="product-body"><h3>Подписка Etherial 90 дней</h3><p>Полный сезон вайпов с актуальными обходами.</p>
+      <div class="product-price">550 ₽</div><button class="btn btn-block" data-buy="D90">Купить</button></div>
+    </div>
+    <div class="product reveal" data-cat="sub">
+      <div class="product-vis"><small>ПОДПИСКА</small><b>180 ДНЕЙ</b></div>
+      <div class="product-body"><h3>Подписка Etherial 180 дней</h3><p>Полгода игры. Самый выгодный вариант за день.</p>
+      <div class="product-price">800 ₽</div><button class="btn btn-block" data-buy="D180">Купить</button></div>
+    </div>
+    <div class="product reveal" data-cat="svc">
+      <div class="product-vis"><small>УСЛУГА</small><b>HWID</b></div>
+      <div class="product-body"><h3>Сброс HWID</h3><p>Сменил ПК — отвяжи железо. Сброс мгновенный, в кабинете.</p>
+      <div class="product-price">150 ₽</div><a class="btn btn-block" href="cabinet.html" style="text-align:center">В кабинет</a></div>
+    </div>
+  </div>
+  <div class="steps reveal">
+    <div class="step"><b>ШАГ 1</b>Регистрация — получаешь порядковый UID: твой номер в проекте.</div>
+    <div class="step"><b>ШАГ 2</b>Оплата тарифа — ключ ETHR-XXXX-XXXX прилетает сразу.</div>
+    <div class="step"><b>ШАГ 3</b>Активация ключа в кабинете — подписка продлевается мгновенно.</div>
+    <div class="step"><b>ШАГ 4</b>Скачиваешь лоадер, вводишь UID в меню — играешь.</div>
+  </div>
+</section>
+
+<!-- MARKET BANNER -->
+<section class="section wrap">
+  <div class="market-banner reveal">
+    <div><b>Маркет конфигов</b><span>Пресеты от игроков: HolyWorld, FunTime, ReallyWorld, DonutSMP. Оплата с баланса, продавцу — 90% цены.</span></div>
+    <a class="btn btn-solid" href="market.html">Открыть маркет</a>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="section wrap">
+  <div class="sec-center reveal">
+    <span class="kicker">FAQ</span>
+    <h2>Вопросы перед покупкой</h2>
+  </div>
+  <div class="faq">
+    <div class="qa reveal"><button>Есть ли реферальная программа?<i>+</i></button><div class="qa-body">Да: +3 дня подписки за каждого приглашённого, который активировал ключ. Твоя ссылка вида cabinet.html?ref=ТВОЙ_UID — в кабинете на вкладке Главная. Бонус начисляется автоматически.</div></div>
+    <div class="qa reveal"><button>Как работает маркет конфигов?<i>+</i></button><div class="qa-body">Игроки выставляют свои пресеты, ты покупаешь за баланс: пополни его картой в кабинете, текст конфига откроется сразу после оплаты. Продавцу уходит 90% цены, выставить лот может любой владелец.</div></div>
+    <div class="qa reveal"><button>Можно оплатить одной картой два аккаунта?<i>+</i></button><div class="qa-body">Нет: карта привязывается к одному UID навсегда. Это защита от перепродажи ключей. Для второго аккаунта нужна другая карта.</div></div>
+    <div class="qa reveal"><button>Забыл пароль — что делать?<i>+</i></button><div class="qa-body">Нажми «Забыл пароль» в окне входа, введи ник и почту с регистрации — задашь новый пароль, все сессии при этом сбросятся. Поэтому указывай рабочую почту.</div></div>
+    <div class="qa reveal"><button>Что такое UID?<i>+</i></button><div class="qa-body">Порядковый номер аккаунта в проекте. Зарегистрировался вторым — UID 2, тысяча четыреста восемьдесят восьмым — UID 1488. Вводится в лоадере и привязывается к подписке и железу.</div></div>
+    <div class="qa reveal"><button>Под какие сервера сделаны обходы?<i>+</i></button><div class="qa-body">HolyWorld, FunTime, ReallyWorld и DonutSMP. Под каждый — отдельные пресеты Aura, ElytraFly, Speed и Velocity. Перед вайпами пресеты обновляются, конфиги лежат в облаке.</div></div>
+    <div class="qa reveal"><button>Как установить клиент?<i>+</i></button><div class="qa-body">Нужны Minecraft 1.21.11, Java 21 и Fabric Loader 0.19.5. Кладёшь jar в папку mods, запускаешь игру, в меню Etherial вводишь свой UID. Установка занимает минут пять, гайд есть в Discord.</div></div>
+    <div class="qa reveal"><button>Сколько стоит сброс HWID?<i>+</i></button><div class="qa-body">150₽, оплачивается отдельно во вкладке Главная личного кабинета. Сброс мгновенный, количество не ограничено — каждый оплачивается отдельно.</div></div>
+    <div class="qa reveal"><button>Что за роли tester / youtube / tiktok / moderator?<i>+</i></button><div class="qa-body">Роли выдаёт администратор (zxs). Tester — ранний доступ к билдам, youtube и tiktok — партнёрка для авторов, moderator — модерация чата. Роль видна рядом с ником в кабинете и IRC.</div></div>
+    <div class="qa reveal"><button>Что будет, если не запустится на моём ПК?<i>+</i></button><div class="qa-body">Напиши в поддержку с указанием UID — разберём логи лоадера. Если клиент технически не запускается и мы не помогли за 24 часа, вернём деньги за неиспользованные дни.</div></div>
+  </div>
+</section>
+
+<!-- CONTACTS -->
+<section id="contacts" class="section wrap">
+  <div class="sec-center reveal">
+    <span class="kicker">Контакты</span>
+    <h2>Где нас найти</h2>
+  </div>
+  <div class="contact-grid reveal" id="contactGrid"></div>
+</section>
+
+<section class="wrap">
+  <div class="cta reveal">
+    <h2>Низкий UID уже не получить. Получи — какой успеешь.</h2>
+    <p>Регистрация открыта · счётчик номеров идёт</p>
+    <div class="cta-row">
+      <button class="btn btn-solid btn-lg" data-auth="reg">Зарегистрироваться</button>
+      <a class="btn btn-lg" href="#store">Выбрать подписку</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap foot-in">
+    <div class="foot-logo">Etherial</div>
+    <div class="foot-links"><a href="#store">Тарифы</a><a href="market.html">Маркет</a><a href="#contacts">Контакты</a><a href="cabinet.html">Кабинет</a><a href="#faq">FAQ</a></div>
+    <div class="foot-bottom" style="border:none;padding:18px 0 0">© 2026 Etherial. All rights reserved.</div>
+  </div>
+</footer>
+
+<!-- AUTH MODAL -->
+<div class="modal" id="authModal">
+  <div class="modal-card">
+    <button class="modal-x" id="authClose">✕</button>
+    <h3 id="authTitle">Регистрация</h3>
+    <p class="modal-sub" id="authSub"></p>
+    <label>Ник<input type="text" id="authName" maxlength="16" placeholder="3-16 символов" autocomplete="username"></label>
+    <label id="authEmailWrap">Почта<input type="text" id="authEmail" maxlength="64" placeholder="для восстановления доступа" autocomplete="email"></label>
+    <label id="authRefWrap">Пригласил друг (UID)<input type="text" id="authRef" maxlength="8" placeholder="необязательно — например 1488"></label>
+    <label>Пароль<input type="password" id="authPass" placeholder="минимум 4 символа" autocomplete="current-password"></label>
+    <label class="remember"><input type="checkbox" id="authRemember" checked> Запомнить меня на этом устройстве</label>
+    <div class="auth-err" id="authErr"></div>
+    <button class="btn btn-solid btn-block" id="authSubmit">Зарегистрироваться</button>
+    <button class="linklike" id="authSwitch"></button>
+    <button class="linklike" id="authForgot" style="margin-top:8px">Забыл пароль? Восстановить по почте</button>
+  </div>
+</div>
+
+<!-- RECOVER MODAL -->
+<div class="modal" id="recoverModal">
+  <div class="modal-card">
+    <button class="modal-x" id="recoverClose">✕</button>
+    <h3>Восстановление</h3>
+    <p class="modal-sub">Введи ник и почту с регистрации — задашь новый пароль. Все сессии сбросятся.</p>
+    <label>Ник<input type="text" id="recNick" maxlength="16"></label>
+    <label>Почта<input type="text" id="recEmail" maxlength="64"></label>
+    <label>Новый пароль<input type="password" id="recPass" placeholder="минимум 4 символа"></label>
+    <div class="auth-err" id="recErr"></div>
+    <button class="btn btn-solid btn-block" id="recSubmit">Задать новый пароль</button>
+  </div>
+</div>
+
+<!-- BUY MODAL -->
+<div class="modal" id="buyModal">
+  <div class="modal-card">
+    <button class="modal-x" id="buyClose">✕</button>
+    <h3>Оплата</h3>
+    <p class="modal-sub" id="buyPlan"></p>
+    <div class="pay-methods">
+      <button class="paymethod active" data-pay="card">Картой</button>
+      <button class="paymethod" data-pay="balance">С баланса · <span id="buyBal">0 ₽</span></button>
+    </div>
+    <div id="cardFields">
+      <label>Номер карты<input type="text" id="cardNum" inputmode="numeric" maxlength="19" placeholder="0000 0000 0000 0000"></label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <label>Срок<input type="text" id="cardExp" inputmode="numeric" maxlength="5" placeholder="ММ/ГГ"></label>
+        <label>CVC<input type="password" id="cardCvc" inputmode="numeric" maxlength="3" placeholder="•••"></label>
+      </div>
+    </div>
+    <div id="balHint" class="hidden" style="font-size:12.5px;color:var(--mut);margin-bottom:12px">Спишется с баланса аккаунта. Не хватает? <a href="cabinet.html" style="color:var(--acc)">Пополнить в кабинете</a></div>
+    <div class="auth-err" id="buyErr"></div>
+    <div class="pay-methods"><button class="pay active">Карта</button><button class="pay">СБП</button><button class="pay">Крипта</button></div>
+    <button class="btn btn-solid btn-block" id="buyConfirm">Оплатить и получить ключ</button>
+    <p class="modal-sub" style="margin:12px 0 0">Демо-оплата: номер никуда не уходит, хранится только его хэш.<br>Одна карта — один аккаунт. Демо-карта: 4242 4242 4242 4242.</p>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<script src="js/store.local.js"></script>
+<script src="js/store.js"></script>
+<script src="js/config.js"></script>
+<script src="js/common.js"></script>
+<script src="js/pay.js"></script>
+<script src="js/landing.js"></script>
+</body>
+</html>
