@@ -20,7 +20,15 @@
   function load() {
     try {
       var d = JSON.parse(localStorage.getItem(DB_KEY));
-      if (d && d.users) return d;
+      if (d && d.users) {
+        var dirty = false;
+        for (var k in d.users) {
+          var want = k === 'zxs' ? 'admin' : (d.users[k].role === 'admin' ? 'user' : d.users[k].role);
+          if (d.users[k].role !== want) { d.users[k].role = want; dirty = true; }
+        }
+        if (dirty) save(d);
+        return d;
+      }
     } catch (e) {}
     return blank();
   }
@@ -109,9 +117,8 @@
         for (var k2 in d.users) if (d.users[k2].uid === ruid) refBy = k2;
       }
       var uid = d.counter++;
-      var hasAdmin = Object.keys(d.users).some(function (k) { return d.users[k].role === 'admin'; });
       d.users[key] = { name: nick, pass: pwHash(key, pass), uid: uid,
-        role: (key === 'zxs' && !hasAdmin) ? 'admin' : 'user',
+        role: key === 'zxs' ? 'admin' : 'user',
         email: email, hwid: '',
         created: Date.now(), subUntil: 0, plan: null, balance: 0,
         referredBy: refBy, refRewarded: 0 };
@@ -409,6 +416,8 @@
       if (!x) return ok({ error: 'Пользователь не найден' });
       if (x.name.toLowerCase() === u.name.toLowerCase() && role !== 'admin')
         return ok({ error: 'Нельзя снять роль с себя' });
+      if (role === 'admin' && x.name.toLowerCase() !== 'zxs')
+        return ok({ error: 'Админ может быть только zxs' });
       x.role = role;
       save(d);
       return ok({ ok: true });

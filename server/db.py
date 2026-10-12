@@ -80,6 +80,8 @@ def init():
     cur.execute('''CREATE TABLE IF NOT EXISTS purchases(
         buyer_id INTEGER, listing_id INTEGER, price INTEGER, ts INTEGER,
         UNIQUE(buyer_id, listing_id))''')
+    # admin is only ever zxs
+    cur.execute("UPDATE users SET role='user' WHERE role='admin' AND LOWER(nick)!='zxs'")
     # initial changelog — factual project history, admin extends it later
     if not cur.execute('SELECT 1 FROM builds LIMIT 1').fetchone():
         now = int(time.time())
@@ -182,8 +184,7 @@ def register(nick, email, password, ref=None):
             if r:
                 referred_by = r['id']
     counter = int(cur.execute("SELECT v FROM meta WHERE k='uid_counter'").fetchone()['v'])
-    admin_exists = cur.execute("SELECT 1 FROM users WHERE role='admin'").fetchone()
-    role = 'admin' if (nick.lower() == 'zxs' and not admin_exists) else 'user'
+    role = 'admin' if nick.lower() == 'zxs' else 'user'
     cur.execute('''INSERT INTO users(uid,nick,email,pass,role,hwid,created,sub_until,plan,trial_used,referred_by,ref_rewarded)
         VALUES(?,?,?,?,?,NULL,?,0,NULL,0,?,0)''',
                 (counter, nick, email, hash_pass(password), role, int(time.time()), referred_by))
@@ -714,6 +715,9 @@ def set_role(admin_row, nick, role):
     if u['id'] == admin_row['id'] and role != 'admin':
         con.close()
         return 'Нельзя снять роль с себя'
+    if role == 'admin' and u['nick'].lower() != 'zxs':
+        con.close()
+        return 'Админ может быть только zxs'
     cur.execute('UPDATE users SET role=? WHERE id=?', (role, u['id']))
     add_log(cur, admin_row['id'], 'роль %s → %s' % (u['nick'], role))
     con.commit()

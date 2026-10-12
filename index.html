@@ -9,16 +9,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="preload" as="image" href="assets/screens/animation.jpg">
-<link rel="preload" as="image" href="assets/screens/animation_2.jpg">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/landing.css">
 </head>
 <body>
-<div id="intro">
-  <img class="intro-frame f1" src="assets/screens/animation.jpg" alt="ethereal">
-  <img class="intro-frame f2" src="assets/screens/animation_2.jpg" alt="ethereal logo">
-</div>
 <canvas id="bg"></canvas>
 
 <header>
@@ -62,7 +56,7 @@
     <span class="kicker">Преимущества</span>
     <h2>Что ты получишь после покупки клиента</h2>
   </div>
-  <div class="adv-grid">
+  <div class="adv-grid reveal stagger">
     <div class="adv reveal">
       <div class="adv-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M12 3l7 3v5c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
       <b>Разработка под сервера</b>
@@ -113,7 +107,7 @@
     <span class="kicker">Статистика</span>
     <h2>Цифры в реальном времени</h2>
   </div>
-  <div class="stats reveal">
+  <div class="stats reveal stagger">
     <div class="stat"><b id="statUsers">0</b><span>Пользователей всего</span></div>
     <div class="stat"><b id="statUpdate">11.10.26</b><span>Последнее обновление</span></div>
     <div class="stat"><b id="statOnline">0</b><span>Сейчас в сети</span></div>
@@ -201,7 +195,7 @@
     <span class="kicker">Контакты</span>
     <h2>Где нас найти</h2>
   </div>
-  <div class="contact-grid reveal" id="contactGrid"></div>
+  <div class="contact-grid reveal stagger" id="contactGrid"></div>
 </section>
 
 <section class="wrap">

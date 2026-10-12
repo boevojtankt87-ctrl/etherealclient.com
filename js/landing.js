@@ -22,39 +22,30 @@
     x.stroke();
   })();
 
-  /* intro animation (friend's frames), once per session */
-  (function () {
-    var intro = document.getElementById('intro');
-    if (!intro) return;
-    function finish() {
-      intro.classList.add('done');
-      try { sessionStorage.setItem('eth_intro', '1'); } catch (e) {}
-      setTimeout(function () { intro.classList.add('gone'); }, 850);
-    }
-    var seen = false;
-    try { seen = sessionStorage.getItem('eth_intro') === '1'; } catch (e) {}
-    if (seen || localStorage.getItem('eth_motion') === 'off') {
-      intro.classList.add('gone');
-      return;
-    }
-    intro.classList.add('play');
-    intro.addEventListener('click', finish);
-    setTimeout(finish, 3900);
-  })();
-
   /* reveal */
   var io = new IntersectionObserver(function (es) {
     es.forEach(function (e) { if (e.isIntersecting) e.target.classList.add('vis'); });
   }, { threshold: 0.1 });
   document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
 
-  /* live stats from the database */
+  /* live stats from the database (count-up) */
+  function countUp(el, to) {
+    if (!el) return;
+    var from = parseInt(String(el.textContent).replace(/\D/g, ''), 10) || 0;
+    if (from === to) { el.textContent = to.toLocaleString('ru-RU'); return; }
+    var t0 = performance.now(), dur = 900;
+    function step(t) {
+      var k = Math.min(1, (t - t0) / dur);
+      k = 1 - Math.pow(1 - k, 3);
+      el.textContent = Math.round(from + (to - from) * k).toLocaleString('ru-RU');
+      if (k < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
   function paintStats() {
     S.stats().then(function (s) {
-      var a = document.getElementById('statUsers');
-      if (a) a.textContent = (s.users || 0).toLocaleString('ru-RU');
-      var b = document.getElementById('statOnline');
-      if (b) b.textContent = s.online || 0;
+      countUp(document.getElementById('statUsers'), s.users || 0);
+      countUp(document.getElementById('statOnline'), s.online || 0);
     });
   }
   paintStats();
