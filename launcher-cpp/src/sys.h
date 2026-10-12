@@ -66,7 +66,7 @@ inline std::string machineId() {
 }
 
 struct Config {
-    std::wstring server = L"http://localhost:8000";
+    std::wstring server = L"http://cg839385.tw1.ru";
     std::wstring gameDir;   // .etherial/mc
     std::string token;
     int ramGb = 4;

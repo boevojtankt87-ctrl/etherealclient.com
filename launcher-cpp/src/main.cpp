@@ -57,7 +57,9 @@ static http::Result apiAuthed(const std::string& path, const std::string& body) 
     HINTERNET conn = InternetConnectW(inet, host, p.nPort, nullptr, nullptr, INTERNET_SERVICE_HTTP, 0, 0);
     if (!conn) { InternetCloseHandle(inet); r.error = L"connect"; return r; }
     HINTERNET req = HttpOpenRequestW(conn, body.empty() ? L"GET" : L"POST", reqpath,
-        nullptr, nullptr, nullptr, INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE, 0);
+        nullptr, nullptr, nullptr,
+        INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE
+            | (p.nScheme == INTERNET_SCHEME_HTTPS ? INTERNET_FLAG_SECURE : 0), 0);
     if (req) {
         std::wstring hdrs = L"Content-Type: application/json\r\nAuthorization: Bearer "
             + http::narrow_to_wide(g_token) + L"\r\n";
@@ -252,7 +254,7 @@ int WINAPI wWinMain(HINSTANCE h, HINSTANCE, LPWSTR cmd, int) {
         if (!lstrcmpW(argv[i], L"--selftest")) {
             AttachConsole(ATTACH_PARENT_PROCESS);
             freopen("CONOUT$", "w", stdout);
-            std::string base = "http://localhost:8000", nick, pass;
+            std::string base = "http://cg839385.tw1.ru", nick, pass;
             if (i + 1 < argc) { char b[512] = {}; WideCharToMultiByte(CP_UTF8, 0, argv[i+1], -1, b, 512, nullptr, nullptr); base = b; }
             if (i + 3 < argc) {
                 char b1[128] = {}, b2[128] = {};
@@ -288,7 +290,7 @@ int WINAPI wWinMain(HINSTANCE h, HINSTANCE, LPWSTR cmd, int) {
             try { j = json::parse(r.body); } catch (...) { ui.toast(L"Ответ сервера", true); return; }
             if (j.at(L"error").type == json::Value::STR) { ui.toast(j.at(L"error").s(), true); return; }
             g_token = w2s(j.at(L"token").s());
-            g_cfg.server = ui.serverF.value().empty() ? L"http://localhost:8000" : ui.serverF.value();
+            g_cfg.server = ui.serverF.value().empty() ? L"http://cg839385.tw1.ru" : ui.serverF.value();
             g_cfg.token = g_token;
             g_cfg.ramGb = ui.ramGb;
             g_cfg.save();
@@ -328,7 +330,7 @@ int WINAPI wWinMain(HINSTANCE h, HINSTANCE, LPWSTR cmd, int) {
         }).detach();
     };
     ui.onSaveSettings = [] {
-        g_cfg.server = ui.serverF.value().empty() ? L"http://localhost:8000" : ui.serverF.value();
+        g_cfg.server = ui.serverF.value().empty() ? L"http://cg839385.tw1.ru" : ui.serverF.value();
         g_cfg.ramGb = ui.ramGb;
         g_cfg.save();
         ui.toast(L"Сохранено", false);

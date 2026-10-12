@@ -105,6 +105,32 @@ class Handler(BaseHTTPRequestHandler):
             return self._json({'user': out})
         if path == '/api/chat':
             return self._json({'messages': db.get_chat()})
+        if path == '/api/irc/poll':
+            u = self._me()
+            if not u:
+                return self._json({'error': 'auth'}, 401)
+            import urllib.parse as _up
+            q = _up.parse_qs(urlparse(self.path).query)
+            try:
+                g_id = int((q.get('g') or ['0'])[0])
+            except ValueError:
+                g_id = 0
+            try:
+                d_id = int((q.get('d') or ['0'])[0])
+            except ValueError:
+                d_id = 0
+            return self._json(db.irc_poll(u, g_id, d_id))
+        if path == '/api/irc/dm':
+            u = self._me()
+            if not u:
+                return self._json({'error': 'auth'}, 401)
+            import urllib.parse as _up
+            q = _up.parse_qs(urlparse(self.path).query)
+            other = (q.get('with') or [''])[0]
+            msgs = db.irc_dm_history(u, other)
+            if msgs is None:
+                return self._json({'error': 'Игрок не найден'})
+            return self._json({'messages': msgs})
         if path == '/api/stats':
             return self._json(db.stats())
         if path == '/api/builds':
@@ -158,7 +184,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json({'error': 'Ник: 3–16 символов (A-Z, 0-9, _)'})
             if len(password) < 4:
                 return self._json({'error': 'Пароль: минимум 4 символа'})
-            res, err = db.register(nick, email, password, data.get('ref'))
+            res, err = db.register(nick, email, password)
             if err:
                 return self._json({'error': err})
             return self._json(res)
@@ -215,8 +241,33 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json({'ok': True})
             return self._json({'error': 'Пустое сообщение'})
 
-        if path == '/api/ref':
-            return self._json(db.ref_stats(u))
+        if path == '/api/irc/send':
+            msg = db.post_chat(u, data.get('text'))
+            if not msg:
+                return self._json({'error': 'Пустое сообщение'})
+            return self._json({'message': msg})
+
+        if path == '/api/irc/dm':
+            msg, err = db.irc_dm_send(u, data.get('to'), data.get('text'))
+            if err:
+                return self._json({'error': err})
+            return self._json({'message': msg})
+
+        if path == '/api/irc/friend/add':
+            err = db.irc_friend_add(u, data.get('nick'))
+            return self._json({'error': err} if err else {'ok': True})
+
+        if path == '/api/irc/friend/accept':
+            err = db.irc_friend_accept(u, data.get('nick'))
+            return self._json({'error': err} if err else {'ok': True})
+
+        if path == '/api/irc/friend/decline':
+            err = db.irc_friend_decline(u, data.get('nick'))
+            return self._json({'error': err} if err else {'ok': True})
+
+        if path == '/api/irc/friend/remove':
+            err = db.irc_friend_remove(u, data.get('nick'))
+            return self._json({'error': err} if err else {'ok': True})
 
         if path == '/api/client-launch':
             res, err = db.client_launch(u, data.get('hwid'))

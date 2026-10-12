@@ -12,7 +12,6 @@ ROLES = ['user', 'tester', 'youtube', 'tiktok', 'moderator', 'admin']
 PLANS = {'TRIAL': 1, 'D7': 7, 'D30': 30, 'D90': 90, 'D180': 180}
 BUYABLE = {'D7', 'D30', 'D90', 'D180'}
 PRICES = {'D7': 100, 'D30': 300, 'D90': 550, 'D180': 800}
-REF_BONUS_DAYS = 3
 MARKET_FEE = 10  # percent kept by the project on market sales
 MARKET_TAGS = ['HolyWorld', 'FunTime', 'ReallyWorld', 'DonutSMP', 'Universal']
 DAY = 86400
@@ -53,10 +52,6 @@ def init():
     if 'last_seen' not in scol:
         cur.execute('ALTER TABLE sessions ADD COLUMN last_seen INTEGER DEFAULT 0')
     ucols = [r['name'] for r in cur.execute('PRAGMA table_info(users)').fetchall()]
-    if 'referred_by' not in ucols:
-        cur.execute('ALTER TABLE users ADD COLUMN referred_by INTEGER')
-    if 'ref_rewarded' not in ucols:
-        cur.execute('ALTER TABLE users ADD COLUMN ref_rewarded INTEGER DEFAULT 0')
     if 'balance' not in ucols:
         cur.execute('ALTER TABLE users ADD COLUMN balance INTEGER DEFAULT 0')
     cur.execute('''CREATE TABLE IF NOT EXISTS cards(
@@ -80,6 +75,14 @@ def init():
     cur.execute('''CREATE TABLE IF NOT EXISTS purchases(
         buyer_id INTEGER, listing_id INTEGER, price INTEGER, ts INTEGER,
         UNIQUE(buyer_id, listing_id))''')
+    cur.execute('''CREATE TABLE IF NOT EXISTS irc_reqs(
+        id INTEGER PRIMARY KEY AUTOINCREMENT, from_id INTEGER, to_id INTEGER,
+        created INTEGER, UNIQUE(from_id, to_id))''')
+    cur.execute('''CREATE TABLE IF NOT EXISTS irc_friends(
+        u1 INTEGER, u2 INTEGER, created INTEGER, UNIQUE(u1, u2))''')
+    cur.execute('''CREATE TABLE IF NOT EXISTS irc_dms(
+        id INTEGER PRIMARY KEY AUTOINCREMENT, from_id INTEGER, to_id INTEGER,
+        text TEXT, ts INTEGER)''')
     # admin is only ever zxs
     cur.execute("UPDATE users SET role='user' WHERE role='admin' AND LOWER(nick)!='zxs'")
     # initial changelog — factual project history, admin extends it later
@@ -161,7 +164,7 @@ def online_count():
     return n
 
 
-def register(nick, email, password, ref=None):
+def register(nick, email, password):
     con = connect()
     cur = con.cursor()
     if cur.execute('SELECT 1 FROM users WHERE LOWER(nick)=LOWER(?)', (nick,)).fetchone():
@@ -173,21 +176,11 @@ def register(nick, email, password, ref=None):
     if cur.execute('SELECT 1 FROM users WHERE LOWER(email)=LOWER(?)', (email,)).fetchone():
         con.close()
         return None, 'Эта почта уже привязана к другому аккаунту'
-    referred_by = None
-    if ref:
-        try:
-            ref_uid = int(str(ref).strip().lstrip('#'))
-        except ValueError:
-            ref_uid = None
-        if ref_uid:
-            r = cur.execute('SELECT id FROM users WHERE uid=?', (ref_uid,)).fetchone()
-            if r:
-                referred_by = r['id']
     counter = int(cur.execute("SELECT v FROM meta WHERE k='uid_counter'").fetchone()['v'])
     role = 'admin' if nick.lower() == 'zxs' else 'user'
-    cur.execute('''INSERT INTO users(uid,nick,email,pass,role,hwid,created,sub_until,plan,trial_used,referred_by,ref_rewarded)
-        VALUES(?,?,?,?,?,NULL,?,0,NULL,0,?,0)''',
-                (counter, nick, email, hash_pass(password), role, int(time.time()), referred_by))
+    cur.execute('''INSERT INTO users(uid,nick,email,pass,role,hwid,created,sub_until,plan,trial_used)
+        VALUES(?,?,?,?,?,NULL,?,0,NULL,0)''',
+                (counter, nick, email, hash_pass(password), role, int(time.time())))
     user_id = cur.lastrowid
     cur.execute("UPDATE meta SET v=? WHERE k='uid_counter'", (str(counter + 1),))
     token = secrets.token_hex(24)
@@ -273,19 +266,6 @@ def activate(user_row, raw):
                 (base + days * DAY, k['plan'], user_row['id']))
     cur.execute('UPDATE keys SET used_by=? WHERE code=?', (user_row['uid'], code))
     add_log(cur, user_row['id'], 'ключ %s активирован → %s (+%d дн.)' % (code, k['plan'], days))
-    # referral bonus: first activation of an invited user rewards the inviter
-    me = cur.execute('SELECT referred_by, ref_rewarded FROM users WHERE id=?',
-                     (user_row['id'],)).fetchone()
-    if me and me['referred_by'] and not me['ref_rewarded']:
-        ref = cur.execute('SELECT * FROM users WHERE id=?', (me['referred_by'],)).fetchone()
-        if ref:
-            base = max(int(time.time()), ref['sub_until'] or 0)
-            plan = ref['plan'] or 'BONUS'
-            cur.execute('UPDATE users SET sub_until=?, plan=? WHERE id=?',
-                        (base + REF_BONUS_DAYS * DAY, plan, ref['id']))
-            add_log(cur, ref['id'], 'реферальный бонус +%d дн. (приглашён UID %d)' %
-                    (REF_BONUS_DAYS, user_row['uid']))
-            cur.execute('UPDATE users SET ref_rewarded=1 WHERE id=?', (user_row['id'],))
     con.commit()
     con.close()
     return {'plan': k['plan'], 'days': days}, None
@@ -556,16 +536,6 @@ def market_toggle(user_row, listing_id, active):
     con.close()
     return {'ok': True}, None
 
-def ref_stats(user_row):
-    con = connect()
-    invited = con.execute('SELECT COUNT(*) c FROM users WHERE referred_by=?',
-                          (user_row['id'],)).fetchone()['c']
-    rewarded = con.execute('SELECT COUNT(*) c FROM users WHERE referred_by=? AND ref_rewarded=1',
-                           (user_row['id'],)).fetchone()['c']
-    con.close()
-    return {'code': user_row['uid'], 'invited': invited,
-            'earnedDays': rewarded * REF_BONUS_DAYS, 'bonusDays': REF_BONUS_DAYS}
-
 
 # ---------- builds (changelog) ----------
 
@@ -667,10 +637,10 @@ def add_poll(question, options_csv):
 
 def get_chat():
     con = connect()
-    rows = con.execute('SELECT nick,uid,role,ts,text FROM chat ORDER BY id DESC LIMIT 60').fetchall()
+    rows = con.execute('SELECT id, nick, uid, role, ts, text FROM chat ORDER BY id DESC LIMIT 60').fetchall()
     con.close()
     rows = list(rows)[::-1]
-    return [{'n': r['nick'], 'uid': r['uid'], 'role': r['role'],
+    return [{'id': r['id'], 'n': r['nick'], 'uid': r['uid'], 'role': r['role'],
              't': r['ts'] * 1000, 'text': r['text']} for r in rows]
 
 
@@ -679,11 +649,207 @@ def post_chat(user_row, text):
     if not text:
         return False
     con = connect()
-    con.execute('INSERT INTO chat(nick,uid,role,ts,text) VALUES(?,?,?,?,?)',
-                (user_row['nick'], user_row['uid'], user_row['role'], int(time.time()), text))
+    cur = con.execute('INSERT INTO chat(nick,uid,role,ts,text) VALUES(?,?,?,?,?)',
+                      (user_row['nick'], user_row['uid'], user_row['role'], int(time.time()), text))
+    con.commit()
+    msg = {'id': cur.lastrowid, 'n': user_row['nick'], 'uid': user_row['uid'],
+           'role': user_row['role'], 't': int(time.time()) * 1000, 'text': text}
+    con.close()
+    return msg
+
+
+# ---------- irc ----------
+
+def _nick_row(con, nick):
+    return con.execute('SELECT * FROM users WHERE LOWER(nick)=LOWER(?)',
+                       ((nick or '').strip(),)).fetchone()
+
+
+def _irc_online(con, user_id):
+    return con.execute('SELECT 1 FROM sessions WHERE user_id=? AND last_seen>?',
+                       (user_id, int(time.time()) - 900)).fetchone() is not None
+
+
+def _irc_user(r):
+    return {'username': r['nick'], 'role': r['role'], 'uid': r['uid']}
+
+
+def irc_global_msg(r):
+    return {'id': r['id'], 'n': r['nick'], 'uid': r['uid'], 'role': r['role'],
+            't': r['ts'] * 1000, 'text': r['text']}
+
+
+def irc_dm_msg(r, me_id):
+    con = connect()
+    fn = con.execute('SELECT nick FROM users WHERE id=?', (r['from_id'],)).fetchone()
+    tn = con.execute('SELECT nick FROM users WHERE id=?', (r['to_id'],)).fetchone()
+    con.close()
+    return {'id': r['id'], 'from': fn['nick'] if fn else '?', 'to': tn['nick'] if tn else '?',
+            'text': r['text'], 't': r['ts'] * 1000, 'self': r['from_id'] == me_id}
+
+
+def irc_friend_lists(user_row):
+    con = connect()
+    uid = user_row['id']
+    friends = []
+    for r in con.execute('''SELECT u.*, f.created c FROM users u JOIN irc_friends f
+            ON (f.u1=? AND f.u2=u.id) OR (f.u2=? AND f.u1=u.id)
+            ORDER BY LOWER(u.nick)''', (uid, uid)):
+        d = _irc_user(r)
+        d['isOnline'] = _irc_online(con, r['id'])
+        last = con.execute('''SELECT text FROM irc_dms
+                WHERE (from_id=? AND to_id=?) OR (from_id=? AND to_id=?)
+                ORDER BY id DESC LIMIT 1''', (uid, r['id'], r['id'], uid)).fetchone()
+        d['lastMessage'] = last['text'] if last else ''
+        friends.append(d)
+    incoming = []
+    for r in con.execute('''SELECT u.*, q.created c FROM irc_reqs q JOIN users u ON u.id=q.from_id
+            WHERE q.to_id=? ORDER BY q.id DESC''', (uid,)):
+        d = _irc_user(r)
+        d['timestamp'] = r['c'] * 1000
+        incoming.append(d)
+    outgoing = []
+    for r in con.execute('''SELECT u.*, q.created c FROM irc_reqs q JOIN users u ON u.id=q.to_id
+            WHERE q.from_id=? ORDER BY q.id DESC''', (uid,)):
+        d = _irc_user(r)
+        d['timestamp'] = r['c'] * 1000
+        outgoing.append(d)
+    con.close()
+    return friends, incoming, outgoing
+
+
+def irc_friend_add(user_row, nick):
+    con = connect()
+    target = _nick_row(con, nick)
+    if not target:
+        con.close()
+        return 'Игрок не найден'
+    if target['id'] == user_row['id']:
+        con.close()
+        return 'Нельзя добавить себя'
+    a, b = sorted((user_row['id'], target['id']))
+    if con.execute('SELECT 1 FROM irc_friends WHERE u1=? AND u2=?', (a, b)).fetchone():
+        con.close()
+        return 'Уже в друзьях'
+    if con.execute('''SELECT 1 FROM irc_reqs WHERE (from_id=? AND to_id=?)
+            OR (from_id=? AND to_id=?)''', (user_row['id'], target['id'],
+                                            target['id'], user_row['id'])).fetchone():
+        con.close()
+        return 'Заявка уже отправлена'
+    con.execute('INSERT OR IGNORE INTO irc_reqs(from_id,to_id,created) VALUES(?,?,?)',
+                (user_row['id'], target['id'], int(time.time())))
     con.commit()
     con.close()
-    return True
+    return None
+
+
+def irc_friend_accept(user_row, nick):
+    con = connect()
+    target = _nick_row(con, nick)
+    if not target:
+        con.close()
+        return 'Игрок не найден'
+    req = con.execute('SELECT 1 FROM irc_reqs WHERE from_id=? AND to_id=?',
+                      (target['id'], user_row['id'])).fetchone()
+    if not req:
+        con.close()
+        return 'Нет заявки от этого игрока'
+    a, b = sorted((user_row['id'], target['id']))
+    con.execute('INSERT OR IGNORE INTO irc_friends(u1,u2,created) VALUES(?,?,?)',
+                (a, b, int(time.time())))
+    con.execute('DELETE FROM irc_reqs WHERE (from_id=? AND to_id=?) OR (from_id=? AND to_id=?)',
+                (target['id'], user_row['id'], user_row['id'], target['id']))
+    con.commit()
+    con.close()
+    return None
+
+
+def irc_friend_decline(user_row, nick):
+    con = connect()
+    target = _nick_row(con, nick)
+    if not target:
+        con.close()
+        return 'Игрок не найден'
+    con.execute('DELETE FROM irc_reqs WHERE (from_id=? AND to_id=?) OR (from_id=? AND to_id=?)',
+                (target['id'], user_row['id'], user_row['id'], target['id']))
+    con.commit()
+    con.close()
+    return None
+
+
+def irc_friend_remove(user_row, nick):
+    con = connect()
+    target = _nick_row(con, nick)
+    if not target:
+        con.close()
+        return 'Игрок не найден'
+    a, b = sorted((user_row['id'], target['id']))
+    con.execute('DELETE FROM irc_friends WHERE u1=? AND u2=?', (a, b))
+    con.commit()
+    con.close()
+    return None
+
+
+def irc_dm_send(user_row, to_nick, text):
+    text = (text or '').strip()[:500]
+    if not text:
+        return None, 'Пустое сообщение'
+    con = connect()
+    target = _nick_row(con, to_nick)
+    if not target:
+        con.close()
+        return None, 'Игрок не найден'
+    if target['id'] == user_row['id']:
+        con.close()
+        return None, 'Нельзя писать себе'
+    now = int(time.time())
+    cur = con.execute('INSERT INTO irc_dms(from_id,to_id,text,ts) VALUES(?,?,?,?)',
+                      (user_row['id'], target['id'], text, now))
+    con.commit()
+    msg = {'id': cur.lastrowid, 'from': user_row['nick'], 'to': target['nick'],
+           'text': text, 't': now * 1000, 'self': True}
+    con.close()
+    return msg, None
+
+
+def irc_dm_history(user_row, other_nick, limit=100):
+    con = connect()
+    other = _nick_row(con, other_nick)
+    if not other:
+        con.close()
+        return None
+    rows = con.execute('''SELECT * FROM irc_dms WHERE (from_id=? AND to_id=?)
+            OR (from_id=? AND to_id=?) ORDER BY id DESC LIMIT ?''',
+                       (user_row['id'], other['id'], other['id'], user_row['id'], limit)).fetchall()
+    con.close()
+    rows = list(rows)[::-1]
+    me = user_row['id']
+    return [{'id': r['id'], 'from': user_row['nick'] if r['from_id'] == me else other['nick'],
+             'to': other['nick'] if r['from_id'] == me else user_row['nick'],
+             'text': r['text'], 't': r['ts'] * 1000, 'self': r['from_id'] == me} for r in rows]
+
+
+def irc_poll(user_row, g_id, d_id):
+    con = connect()
+    me = user_row['id']
+    g = [irc_global_msg(r) for r in con.execute(
+        '''SELECT c.id, u.nick, u.uid, u.role, c.ts, c.text FROM chat c
+           JOIN users u ON u.uid=c.uid
+           WHERE c.id>? ORDER BY c.id LIMIT 300''', (g_id,))]
+    dms = []
+    for r in con.execute('''SELECT * FROM irc_dms WHERE id>? AND (from_id=? OR to_id=?)
+            ORDER BY id LIMIT 300''', (d_id, me, me)):
+        fn = con.execute('SELECT nick FROM users WHERE id=?', (r['from_id'],)).fetchone()
+        tn = con.execute('SELECT nick FROM users WHERE id=?', (r['to_id'],)).fetchone()
+        dms.append({'id': r['id'], 'from': fn['nick'] if fn else '?',
+                    'to': tn['nick'] if tn else '?', 'text': r['text'],
+                    't': r['ts'] * 1000, 'self': r['from_id'] == me})
+    online = con.execute('SELECT COUNT(DISTINCT user_id) c FROM sessions WHERE last_seen>?',
+                         (int(time.time()) - 900,)).fetchone()['c']
+    con.close()
+    friends, incoming, outgoing = irc_friend_lists(user_row)
+    return {'global': g, 'dms': dms, 'friends': friends, 'incoming': incoming,
+            'outgoing': outgoing, 'online': online}
 
 
 # ---------- admin ----------

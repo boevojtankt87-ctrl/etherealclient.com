@@ -120,21 +120,6 @@
       S.logout().then(function () { location.reload(); });
     });
 
-    /* referral card */
-    (function () {
-      var base = location.href.split('?')[0];
-      document.getElementById('refLink').value = base + '?ref=' + me.uid;
-      S.refStats().then(function (r) {
-        if (r.error) return;
-        document.getElementById('refStats').textContent =
-          'Приглашено: ' + r.invited + ' · заработано бонусом: ' + r.earnedDays + ' дн. (+' + 3 + ' дн. за каждого с ключом)';
-      });
-    })();
-    document.getElementById('refCopy').addEventListener('click', function () {
-      try { navigator.clipboard.writeText(document.getElementById('refLink').value); toast('Реферальная ссылка скопирована'); }
-      catch (e) { toast(document.getElementById('refLink').value); }
-    });
-
     /* IRC */
     renderChat(true);
     document.getElementById('chatSend').addEventListener('click', sendChat);

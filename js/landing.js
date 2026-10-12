@@ -116,7 +116,6 @@
     document.getElementById('authSubmit').textContent = isReg ? 'Зарегистрироваться' : 'Войти';
     document.getElementById('authSwitch').textContent = isReg ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Регистрация';
     document.getElementById('authEmailWrap').style.display = isReg ? '' : 'none';
-    document.getElementById('authRefWrap').style.display = isReg ? '' : 'none';
     document.getElementById('authForgot').style.display = isReg ? 'none' : '';
     document.getElementById('authErr').textContent = '';
     modal.classList.add('show');
@@ -134,7 +133,7 @@
     var pass = document.getElementById('authPass').value;
     var remember = document.getElementById('authRemember').checked;
     var p = authMode === 'reg'
-      ? S.register(name, document.getElementById('authEmail').value, pass, remember, document.getElementById('authRef').value)
+      ? S.register(name, document.getElementById('authEmail').value, pass, remember)
       : S.login(name, pass, remember);
     p.then(function (r) {
       if (r.error) { document.getElementById('authErr').textContent = r.error; return; }
@@ -198,13 +197,6 @@
     }).join('');
   });
 
-  /* ---- referral prefill (?ref=UID) ---- */
-  var ref0 = '';
-  try { ref0 = new URLSearchParams(location.search).get('ref') || ''; } catch (e) {}
-  if (ref0) {
-    var ri = document.getElementById('authRef');
-    if (ri) ri.value = ref0.replace(/\D/g, '').slice(0, 8);
-  }
   /* ---- bypass status ---- */
   (function () {
     var grid = document.getElementById('bypassGrid');

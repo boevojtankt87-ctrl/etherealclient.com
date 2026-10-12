@@ -125,16 +125,8 @@ inline Result request(const std::wstring& url, const std::string& post,
                       std::function<void(long long, long long)> progress = nullptr,
                       std::vector<char>* outBin = nullptr) {
     Result r;
-    if (!isLocal(url)) {
-        // external: curl (robust TLS/redirects); localhost API stays on WinINet
-        if (outBin || !post.empty()) { r.error = L"external binary/post unsupported"; return r; }
-        std::string body;
-        long code = curlText(url, body);
-        if (code != 200) { r.error = L"curl http " + std::to_wstring(code); return r; }
-        r.code = 200;
-        r.body = body;
-        return r;
-    }
+    // WinINet for every text request (localhost and external API alike);
+    // curl is only used for large file downloads (curlDownload).
     HINTERNET inet = InternetOpenW(L"EtherialLauncher/1.0", INTERNET_OPEN_TYPE_PRECONFIG, nullptr, nullptr, 0);
     if (!inet) { r.error = L"no inet"; return r; }
     std::wstring u = url;
@@ -149,13 +141,13 @@ inline Result request(const std::wstring& url, const std::string& post,
         HINTERNET conn = InternetConnectW(inet, host, parts.nPort, nullptr, nullptr,
                                           INTERNET_SERVICE_HTTP, 0, 0);
         if (!conn) { r.error = L"connect"; break; }
-        const wchar_t* verb = post.empty() && !outBin ? nullptr : nullptr;
-        // GET when post empty and caller wants text; POST otherwise. Downloads always GET.
+        DWORD flags = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE
+                    | INTERNET_FLAG_KEEP_CONNECTION;
+        if (parts.nScheme == INTERNET_SCHEME_HTTPS) flags |= INTERNET_FLAG_SECURE;
+        // GET when post empty; POST otherwise.
         bool isPost = !post.empty();
         HINTERNET req = HttpOpenRequestW(conn, isPost ? L"POST" : L"GET", fullPath.c_str(),
-                                         L"HTTP/1.1", nullptr, nullptr,
-                                         INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE
-                                         | INTERNET_FLAG_KEEP_CONNECTION, 0);
+                                         L"HTTP/1.1", nullptr, nullptr, flags, 0);
         if (!req) { InternetCloseHandle(conn); r.error = L"open req"; break; }
         std::wstring hdrs = L"Content-Type: application/json\r\nAccept: */*\r\n";
         BOOL sent = HttpSendRequestW(req, hdrs.c_str(), (DWORD)hdrs.size(),

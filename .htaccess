@@ -1,0 +1,24 @@
+# Etherial — shared hosting (Timeweb/Apache) config
+AddDefaultCharset UTF-8
+DirectoryIndex index.html
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # /api/* -> single PHP front controller (REQUEST_URI stays /api/...)
+  RewriteRule ^api/(.*)$ api.php [L]
+
+  # never expose the database or server sources
+  RewriteRule ^(data|server|launcher-cpp)(/|$) - [F,L]
+</IfModule>
+
+<IfModule mod_authz_core.c>
+  <FilesMatch "\.(db|sqlite|sqlite3|sql|log|md)$">
+    Require all denied
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+</IfModule>

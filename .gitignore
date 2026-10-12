@@ -4,6 +4,10 @@ server/__pycache__/
 __pycache__/
 *.pyc
 
+# php
+data/
+config.php
+
 # java
 launcher/out/
 launcher/dist/

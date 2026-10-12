@@ -19,7 +19,7 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
-"%GCC%" -std=c++17 -O2 -finput-charset=UTF-8 -fexec-charset=UTF-8 -DUNICODE -D_UNICODE -municode -static-libgcc -static-libstdc++ src\main.cpp app.res -o EtherealLauncher.exe -lwininet -lgdi32 -lmsimg32 -lcrypt32 -liphlpapi -lshell32 -lole32 -luuid -lwinmm
+"%GCC%" -std=c++17 -O2 -finput-charset=UTF-8 -fexec-charset=UTF-8 -DUNICODE -D_UNICODE -municode -mwindows -static-libgcc -static-libstdc++ src\main.cpp app.res -o EtherealLauncher.exe -lwininet -lgdi32 -lgdiplus -lmsimg32 -lcrypt32 -liphlpapi -lshell32 -lole32 -luuid -lwinmm
 if errorlevel 1 (
   echo BUILD FAILED
   pause

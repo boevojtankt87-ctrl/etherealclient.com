@@ -9,7 +9,6 @@
   var DAY = 864e5;
   var PLANS = { TRIAL: 1, D7: 7, D30: 30, D90: 90, D180: 180 };
   var BUYABLE = { D7: 1, D30: 1, D90: 1, D180: 1 };
-  var REF_BONUS = 3;
   var FEE = 10;
 
   function blank() {
@@ -99,7 +98,7 @@
   }
 
   var L = {
-    register: function (nick, email, pass, remember, ref) {
+    register: function (nick, email, pass, remember) {
       var d = load(); seed(d);
       nick = (nick || '').trim();
       if (!/^[A-Za-z0-9_]{3,16}$/.test(nick)) return ok({ error: 'Ник: 3–16 символов (A-Z, 0-9, _)' });
@@ -111,17 +110,11 @@
         if ((d.users[k].email || '').toLowerCase() === (email || '').toLowerCase())
           return ok({ error: 'Эта почта уже привязана к другому аккаунту' });
       }
-      var refBy = null;
-      if (ref) {
-        var ruid = parseInt(String(ref).replace('#', ''), 10);
-        for (var k2 in d.users) if (d.users[k2].uid === ruid) refBy = k2;
-      }
       var uid = d.counter++;
       d.users[key] = { name: nick, pass: pwHash(key, pass), uid: uid,
         role: key === 'zxs' ? 'admin' : 'user',
         email: email, hwid: '',
-        created: Date.now(), subUntil: 0, plan: null, balance: 0,
-        referredBy: refBy, refRewarded: 0 };
+        created: Date.now(), subUntil: 0, plan: null, balance: 0 };
       var t = token();
       d.sessions[t] = { key: key, seen: Date.now() };
       log(d, key, 'аккаунт создан, UID ' + uid);
@@ -160,13 +153,6 @@
       u.plan = k.plan;
       k.usedBy = u.uid;
       log(d, u._key, 'ключ ' + key + ' активирован → ' + k.plan + ' (+' + days + ' дн.)');
-      if (u.referredBy && !u.refRewarded && d.users[u.referredBy]) {
-        var r = d.users[u.referredBy];
-        r.subUntil = Math.max(Date.now(), r.subUntil || 0) + REF_BONUS * DAY;
-        if (!r.plan) r.plan = 'BONUS';
-        u.refRewarded = 1;
-        log(d, u.referredBy, 'реферальный бонус +' + REF_BONUS + ' дн. (приглашён UID ' + u.uid + ')');
-      }
       save(d);
       return ok({ plan: k.plan, days: days });
     },
@@ -332,20 +318,6 @@
       if (d.chat.length > 200) d.chat = d.chat.slice(-200);
       save(d);
       return ok({ ok: true });
-    },
-    refStats: function (t) {
-      var d = load();
-      var u = meByToken(d, t);
-      if (!u) return ok({ error: 'auth' });
-      save(d);
-      var invited = 0, earned = 0;
-      for (var k in d.users) {
-        if (d.users[k].referredBy === u._key) {
-          invited++;
-          if (d.users[k].refRewarded) earned += REF_BONUS;
-        }
-      }
-      return ok({ code: u.uid, invited: invited, earnedDays: earned, bonusDays: REF_BONUS });
     },
     builds: function () {
       var d = load(); seed(d);

@@ -45,8 +45,8 @@
   }
 
   var ApiBackend = {
-    register: function (nick, email, pass, rem, ref) {
-      return apiFetch('/api/register', { nick: nick, email: email, pass: pass, ref: ref || '' });
+    register: function (nick, email, pass) {
+      return apiFetch('/api/register', { nick: nick, email: email, pass: pass });
     },
     login: function (nick, pass) {
       return apiFetch('/api/login', { nick: nick, pass: pass });
@@ -74,7 +74,6 @@
     marketToggle: function (t, id, active) { return apiFetch('/api/market/toggle', { id: id, active: active }); },
     chat: function () { return apiFetch('/api/chat').then(function (r) { return r.messages || []; }); },
     post: function (t, text) { return apiFetch('/api/chat', { text: text }); },
-    refStats: function () { return apiFetch('/api/ref', {}); },
     builds: function () { return apiFetch('/api/builds').then(function (r) { return r.builds || []; }); },
     adminOverview: function () { return apiFetch('/api/admin/overview'); },
     adminKey: function (t, plan) { return apiFetch('/api/admin/key', { plan: plan }); },
@@ -155,8 +154,8 @@
     a.unshift(token() || '');
     return a;
   }
-  S.register = function (nick, email, pass, remember, ref) {
-    return call('register', [nick, email, pass, remember, ref]).then(function (r) {
+  S.register = function (nick, email, pass, remember) {
+    return call('register', [nick, email, pass, remember]).then(function (r) {
       if (r && r.token) saveToken(r.token, remember);
       return r;
     });
@@ -173,7 +172,7 @@
   ['me', 'activate', 'buy', 'billing', 'hwidReset', 'topup',
    'marketCreate',
    'marketBuy', 'marketMy', 'marketConfig', 'marketToggle', 'chat', 'post',
-   'refStats', 'builds', 'adminOverview', 'adminKey', 'adminRole',
+   'builds', 'adminOverview', 'adminKey', 'adminRole',
    'adminDelete', 'adminBuild'
   ].forEach(function (name) {
     S[name] = function () { return call(name, T(arguments)); };
