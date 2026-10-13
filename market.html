@@ -18,21 +18,21 @@
   <div class="header-in">
     <a href="index.html" class="logo"><img src="assets/logo.png" alt="Ethereal">ETHEREAL</a>
     <nav class="nav" id="nav">
-      <a href="index.html">Главная</a>
-      <a href="market.html">Маркет</a>
-      <a href="index.html#store">Тарифы</a>
-      <a href="cabinet.html">Кабинет</a>
+      <a href="index.html"><svg class="ico"><use href="#i-home"></use></svg>Главная</a>
+      <a href="market.html"><svg class="ico"><use href="#i-tag"></use></svg>Маркет</a>
+      <a href="index.html#store"><svg class="ico"><use href="#i-bag"></use></svg>Тарифы</a>
+      <a href="cabinet.html"><svg class="ico"><use href="#i-user"></use></svg>Кабинет</a>
     </nav>
     <div class="header-right">
       <span class="ver-tag" id="mBal">0 ₽</span>
-      <button class="btn btn-sm btn-solid" id="headAuth">Войти</button>
+      <button class="btn btn-sm btn-solid" id="headAuth"><svg class="ico"><use href="#i-login"></use></svg><span id="headAuthLabel">Войти</span></button>
       <button class="burger" id="burger"><span></span><span></span><span></span></button>
     </div>
   </div>
 </header>
 
 <main class="wrap" style="padding-top:44px">
-  <span class="kicker">// МАРКЕТ КОНФИГОВ</span>
+  <span class="kicker"><svg class="ico"><use href="#i-tag"></use></svg>// МАРКЕТ КОНФИГОВ</span>
   <h1 style="font-size:clamp(24px,3.4vw,34px);font-weight:800;letter-spacing:-1px;margin:14px 0 4px">Пресеты от игроков</h1>
   <p style="color:var(--mut);font-size:14px;max-width:640px;line-height:1.65">Выставляй свои конфиги, покупай чужие. Оплата — с баланса (пополняется в кабинете), продавцу уходит 90% цены. Текст конфига открывается сразу после покупки.</p>
 
@@ -55,6 +55,7 @@
 <footer>
   <div class="wrap foot-in">
     <div class="foot-logo">Ethereal</div>
+    <div class="foot-socials" id="footSocials"></div>
     <div class="foot-links"><a href="index.html#store">Тарифы</a><a href="market.html">Маркет</a><a href="cabinet.html">Кабинет</a></div>
     <div class="foot-bottom" style="border:none;padding:18px 0 0">© 2026 Ethereal. All rights reserved.</div>
   </div>
@@ -95,6 +96,7 @@
 <div id="toasts"></div>
 <script src="js/store.local.js"></script>
 <script src="js/store.js"></script>
+<script src="js/config.js"></script>
 <script src="js/common.js"></script>
 <script src="js/market.js"></script>
 </body>

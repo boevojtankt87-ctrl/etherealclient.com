@@ -57,12 +57,13 @@
       return apiFetch('/api/me').then(function (r) { return r.user || null; });
     },
     activate: function (t, key) { return apiFetch('/api/activate', { key: key }); },
-    buy: function (t, plan, hash, pay) {
-      return apiFetch('/api/buy', { plan: plan, card_hash: hash || '', pay: pay || 'card' });
+    buy: function (t, plan) {
+      return apiFetch('/api/buy', { plan: plan, pay: 'balance' });
     },
-    billing: function () { return apiFetch('/api/billing', {}); },
+    payCreate: function (t, kind, plan, amount) {
+      return apiFetch('/api/pay/create', { kind: kind, plan: plan || '', amount: amount || 0 });
+    },
     hwidReset: function () { return apiFetch('/api/hwid-reset', {}); },
-    topup: function (t, amount, hash) { return apiFetch('/api/topup', { amount: amount, card_hash: hash }); },
     marketList: function (tag, q) {
       return fetch(apiBase() + '/api/market?tag=' + encodeURIComponent(tag || '') + '&q=' + encodeURIComponent(q || ''))
         .then(function (r) { return r.json(); });
@@ -182,7 +183,7 @@
   S.logout = function () {
     return call('logout', []).then(function (r) { clearToken(); return r; });
   };
-  ['me', 'activate', 'buy', 'billing', 'hwidReset', 'topup',
+  ['me', 'activate', 'buy', 'billing', 'hwidReset', 'payCreate',
    'marketCreate',
    'marketBuy', 'marketMy', 'marketConfig', 'marketToggle', 'chat', 'post',
    'builds', 'adminOverview', 'adminUsers', 'adminFind', 'adminBan', 'adminBanHwid',

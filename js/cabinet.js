@@ -73,7 +73,9 @@
     document.getElementById('sideUid').textContent = '#' + me.uid + ' · ' + me.role;
     if (me.role !== 'admin') {
       var at = document.querySelector('[data-tab="admin"]');
-      if (at) at.classList.add('hidden');
+      if (at) at.parentNode.removeChild(at);
+      var ap = document.getElementById('panel-admin');
+      if (ap) ap.parentNode.removeChild(ap);
     } else if (location.hash === '#admin') {
       var atab = document.querySelector('[data-tab="admin"]');
       if (atab) atab.click();
@@ -261,9 +263,6 @@
         : '<div>пусто — пополни баланс выше</div>';
     });
   }
-  PayCard.wireNum(document.getElementById('topCard'));
-  PayCard.wireExp(document.getElementById('topExp'));
-  PayCard.wireCvc(document.getElementById('topCvc'));
   document.getElementById('topAmount').addEventListener('input', function (e) {
     e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
   });
@@ -275,21 +274,21 @@
     });
   });
   document.getElementById('topSubmit').addEventListener('click', function () {
-    var v = PayCard.validate(
-      document.getElementById('topCard'),
-      document.getElementById('topExp'),
-      document.getElementById('topCvc'));
-    if (!v.ok) { document.getElementById('topErr').textContent = v.err; return; }
     var amt = parseInt(document.getElementById('topAmount').value, 10);
     if (!amt || amt < 50 || amt > 100000) {
       document.getElementById('topErr').textContent = 'Сумма от 50 до 100000 ₽';
       return;
     }
     document.getElementById('topErr').textContent = '';
-    S.topup(amt, v.hash).then(function (r) {
+    S.payCreate('topup', '', amt).then(function (r) {
       if (r.error) { document.getElementById('topErr').textContent = r.error; return; }
-      toast('Баланс пополнен: +' + amt + ' ₽');
-      renderBalance();
+      if (r.demo) {
+        toast('Баланс пополнен: +' + amt + ' ₽ (демо)');
+        renderBalance();
+        return;
+      }
+      if (r.url) { location.href = r.url; return; }
+      document.getElementById('topErr').textContent = 'Не удалось создать платёж. Попробуй позже.';
     });
   });
 

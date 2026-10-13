@@ -15,6 +15,71 @@
   window.EthTheme = { apply: applyTheme };
   applyTheme();
 
+  /* ---------- inline icon sprite (Phobia-style nav/card icons) ---------- */
+  var SPRITE = '<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">' +
+    '<symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/></symbol>' +
+    '<symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 016 0v2"/></symbol>' +
+    '<symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12V4h8l9 9-8 8z"/><circle cx="8" cy="8" r="1.4"/></symbol>' +
+    '<symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 6h16v9H9l-5 4z"/><circle cx="9" cy="11" r=".9"/><circle cx="13" cy="11" r=".9"/><circle cx="17" cy="11" r=".9"/></symbol>' +
+    '<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.5 3-5.5 7-5.5s7 2 7 5.5"/></symbol>' +
+    '<symbol id="i-login" viewBox="0 0 24 24"><path d="M14 4h5v16h-5"/><path d="M10 8l4 4-4 4"/><path d="M14 12H3"/></symbol>' +
+    '<symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11h10.2L20 7H6"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></symbol>' +
+    '<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M7 17L17 7"/><path d="M9 7h8v8"/></symbol>' +
+    '<symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></symbol>' +
+    '<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.5"/></symbol>' +
+    '<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></symbol>' +
+    '<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></symbol>' +
+    '<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L5 14h6l-1 8 8-12h-6z"/></symbol>' +
+    '<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></symbol>' +
+    '<symbol id="i-crown" viewBox="0 0 24 24"><path d="M4 17h16"/><path d="M4 17l-1-9 5 4 4-6 4 6 5-4-1 9"/></symbol>' +
+    '<symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.6 2.6 0 015 1c0 1.7-2.5 2-2.5 3.5"/><circle cx="12" cy="17" r=".6"/></symbol>' +
+    '<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></symbol>' +
+    '<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v10"/><path d="M8 11l4 4 4-4"/><path d="M4 19h16"/></symbol>' +
+    '<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M4 9a8 8 0 0114-3l2 2"/><path d="M20 15a8 8 0 01-14 3l-2-2"/><path d="M20 4v4h-4"/><path d="M4 20v-4h4"/></symbol>' +
+    '<symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18M16 15h2"/></symbol>' +
+    '<symbol id="i-discord" viewBox="0 0 24 24"><path d="M8 5.5S6.5 4 4.5 4C3 9 3 15 4.5 20c2 0 3.5-1.5 3.5-1.5"/><path d="M16 5.5S17.5 4 19.5 4C21 9 21 15 19.5 20c-2 0-3.5-1.5-3.5-1.5"/><path d="M8.5 17c2.3 1.2 4.7 1.2 7 0"/><circle cx="9.5" cy="12" r=".8"/><circle cx="14.5" cy="12" r=".8"/></symbol>' +
+    '<symbol id="i-telegram" viewBox="0 0 24 24"><path d="M21 5L2.5 12l5.5 2 2 5.5L13 15l4.5 3.5L21 5z"/><path d="M8 14l10-8-6 10"/></symbol>' +
+    '<symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></symbol>' +
+    '</svg>';
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!document.getElementById('eth-sprite')) {
+      var wrap = document.createElement('div');
+      wrap.id = 'eth-sprite';
+      wrap.innerHTML = SPRITE;
+      document.body.insertBefore(wrap, document.body.firstChild);
+    }
+    /* footer socials from EthConfig.CONTACTS */
+    var fs = document.getElementById('footSocials');
+    if (fs) {
+      var C = (window.EthConfig && window.EthConfig.CONTACTS) || {};
+      var soc = [
+        ['discord', 'i-discord', 'Discord'],
+        ['telegram', 'i-telegram', 'Telegram'],
+        ['youtube', 'i-spark', 'YouTube']
+      ].filter(function (s) { return C[s[0]]; }).map(function (s) {
+        return '<a href="' + C[s[0]] + '" target="_blank" rel="noopener" aria-label="' + s[2] + '"><svg class="ico"><use href="#' + s[1] + '"></use></svg></a>';
+      }).join('');
+      if (soc) { fs.innerHTML = soc; fs.style.display = ''; } else { fs.style.display = 'none'; }
+    }
+    /* eye toggles on password fields */
+    document.querySelectorAll('input[type="password"]').forEach(function (inp) {
+      if (inp.closest('.remember') || inp.closest('.admin-sel')) return;
+      var lab = inp.closest('label') || inp.parentElement;
+      if (!lab) return;
+      lab.classList.add('pw-wrap');
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pw-eye';
+      b.innerHTML = '<svg class="ico"><use href="#i-eye"></use></svg>';
+      b.addEventListener('click', function () {
+        var show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        b.classList.toggle('on', show);
+      });
+      lab.appendChild(b);
+    });
+  });
+
   document.addEventListener('DOMContentLoaded', function () {
     if (window.EthStore && window.EthStore.mode) {
       window.EthStore.mode().then(function (m) {

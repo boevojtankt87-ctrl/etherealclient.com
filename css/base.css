@@ -150,6 +150,40 @@ body[data-theme="mono"] .header-in { background: rgba(12, 12, 12, .82); }
   font-size: 13px; font-weight: 600; color: var(--acc);
 }
 .kicker::before { content: ''; width: 8px; height: 8px; background: var(--acc); transform: rotate(45deg); border-radius: 1.5px; }
+.kicker .ico { width: 14px; height: 14px; }
+
+/* ---------- inline icons (svg sprite) ---------- */
+.ico {
+  width: 17px; height: 17px; flex: 0 0 auto; display: inline-block; vertical-align: -3px;
+  fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+}
+.btn .ico { vertical-align: -4px; margin-right: 6px; }
+.btn-ico-only .ico { margin-right: 0; }
+.nav a { display: inline-flex; align-items: center; gap: 6px; }
+.nav a .ico { width: 14px; height: 14px; opacity: .75; }
+.nav a:hover .ico, .nav a.on .ico { opacity: 1; }
+.qa button i { font-style: normal; font-size: 16px; color: var(--acc); line-height: 1; }
+.foot-socials { display: flex; gap: 10px; justify-content: center; margin-top: 16px; }
+.foot-socials a {
+  width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line2); color: var(--mut); transition: color .2s, border-color .2s, transform .15s;
+}
+.foot-socials a:hover { color: var(--acc); border-color: var(--acc); transform: translateY(-2px); }
+.foot-socials .ico { width: 16px; height: 16px; }
+
+/* product card icon chip */
+.product-vis .ico { width: 26px; height: 26px; color: var(--acc); opacity: .9; filter: drop-shadow(0 0 8px rgba(0,0,0,.5)); }
+
+/* password field eye toggle */
+.pw-wrap { position: relative; display: block; }
+.pw-eye {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: var(--mut); padding: 4px; line-height: 0;
+  transition: color .2s;
+}
+.pw-eye:hover, .pw-eye.on { color: var(--acc); }
+.pw-eye .ico { width: 16px; height: 16px; }
+label:has(> .pw-eye) input { padding-right: 36px; }
 
 /* ---------- footer ---------- */
 footer { border-top: 1px solid var(--line); margin-top: 110px; }

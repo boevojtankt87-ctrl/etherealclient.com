@@ -25,8 +25,10 @@
   function paintHead() {
     S.me().then(function (me) {
       var hb = document.getElementById('headAuth');
+      var lbl = document.getElementById('headAuthLabel');
       if (me) {
-        hb.textContent = me.name + ' #' + me.uid;
+        if (lbl) lbl.textContent = me.name + ' #' + me.uid;
+        else hb.textContent = me.name + ' #' + me.uid;
         hb.onclick = function () { location.href = 'cabinet.html'; };
         S.billing().then(function (b) {
           document.getElementById('mBal').textContent = (b.balance || 0) + ' ₽';

@@ -149,25 +149,6 @@
     });
   });
 
-  /* ---- card input: formatting + validation (shared PayCard) ---- */
-  PayCard.wireNum(document.getElementById('cardNum'));
-  PayCard.wireExp(document.getElementById('cardExp'));
-  PayCard.wireCvc(document.getElementById('cardCvc'));
-  function cardValid() {
-    var r = PayCard.validate(
-      document.getElementById('cardNum'),
-      document.getElementById('cardExp'),
-      document.getElementById('cardCvc'));
-    if (!r.ok) return r.err;
-    return '';
-  }
-  function cardHash() {
-    return PayCard.validate(
-      document.getElementById('cardNum'),
-      document.getElementById('cardExp'),
-      document.getElementById('cardCvc')).hash;
-  }
-
   /* ---- trial removed ---- */
 
   /* ---- builds timeline ---- */
@@ -196,8 +177,10 @@
   S.me().then(function (me) {
     var hb = document.getElementById('headAuth');
     if (!hb) return;
+    var lbl = document.getElementById('headAuthLabel');
     if (me) {
-      hb.textContent = me.name + ' #' + me.uid;
+      if (lbl) lbl.textContent = me.name + ' #' + me.uid;
+      else hb.textContent = me.name + ' #' + me.uid;
       hb.addEventListener('click', function () { location.href = 'cabinet.html'; });
     } else {
       hb.addEventListener('click', function () { openAuth('login'); });
@@ -212,12 +195,12 @@
       if (!S.hasSession()) {
         pendingBuy = b.dataset.buy;
         openAuth('reg');
-        toast('Сначала зарегистрируйся — ключ привяжется к твоему UID');
+        toast('Сначала зарегистрируйся — подписка привяжется к твоему UID');
         return;
       }
       buyPlan = b.dataset.buy;
       document.getElementById('buyPlan').textContent =
-        (S.PLAN_LABEL[buyPlan] || buyPlan) + ' — ' + S.PRICES[buyPlan] + ' ₽. Ключ выдаётся сразу после оплаты.';
+        (S.PLAN_LABEL[buyPlan] || buyPlan) + ' — ' + S.PRICES[buyPlan] + ' ₽. Подписка активируется сразу после оплаты.';
       document.getElementById('buyErr').textContent = '';
       S.billing().then(function (bl) {
         document.getElementById('buyBal').textContent = (bl.balance || 0) + ' ₽';
@@ -230,36 +213,38 @@
       document.querySelectorAll('.paymethod').forEach(function (x) { x.classList.remove('active'); });
       p.classList.add('active');
       var bal = p.dataset.pay === 'balance';
-      document.getElementById('cardFields').style.display = bal ? 'none' : '';
       document.getElementById('balHint').classList.toggle('hidden', !bal);
+      document.getElementById('onlineHint').classList.toggle('hidden', bal);
       document.getElementById('buyErr').textContent = '';
     });
   });
   document.getElementById('buyClose').addEventListener('click', function () { buyModal.classList.remove('show'); });
   buyModal.addEventListener('click', function (e) { if (e.target === buyModal) buyModal.classList.remove('show'); });
-  document.querySelectorAll('.pay').forEach(function (p) {
-    p.addEventListener('click', function () {
-      document.querySelectorAll('.pay').forEach(function (x) { x.classList.remove('active'); });
-      p.classList.add('active');
-    });
-  });
   document.getElementById('buyConfirm').addEventListener('click', function () {
     var payMode = document.querySelector('.paymethod.active');
-    var pay = payMode ? payMode.dataset.pay : 'card';
-    var hash = '';
-    if (pay === 'card') {
-      var err = cardValid();
-      if (err) { document.getElementById('buyErr').textContent = err; return; }
-      hash = cardHash();
-    }
+    var pay = payMode ? payMode.dataset.pay : 'online';
     document.getElementById('buyErr').textContent = '';
-    S.buy(buyPlan, hash, pay).then(function (r) {
-      if (r.error) { document.getElementById('buyErr').textContent = r.error; return; }
-      buyModal.classList.remove('show');
-      try { navigator.clipboard.writeText(r.code); } catch (e) {}
-      toast('Оплачено' + (pay === 'balance' ? ' с баланса' : '') + '. Ключ: ' + r.code + ' (скопирован)');
-      setTimeout(function () { location.href = 'cabinet.html'; }, 1200);
-    });
+    if (pay === 'balance') {
+      S.buy(buyPlan).then(function (r) {
+        if (r.error) { document.getElementById('buyErr').textContent = r.error; return; }
+        buyModal.classList.remove('show');
+        toast('Подписка активирована с баланса (+' + r.days + ' дн.)');
+        setTimeout(function () { location.href = 'cabinet.html'; }, 1200);
+      });
+    } else {
+      S.payCreate('sub', buyPlan).then(function (r) {
+        if (r.error) { document.getElementById('buyErr').textContent = r.error; return; }
+        if (r.demo) {
+          /* local demo backend: no gateway — activate right away */
+          buyModal.classList.remove('show');
+          toast('Демо-оплата: подписка активирована');
+          setTimeout(function () { location.href = 'cabinet.html'; }, 1200);
+          return;
+        }
+        if (r.url) { location.href = r.url; return; }
+        document.getElementById('buyErr').textContent = 'Не удалось создать платёж. Попробуй позже.';
+      });
+    }
   });
 
   document.addEventListener('keydown', function (e) {

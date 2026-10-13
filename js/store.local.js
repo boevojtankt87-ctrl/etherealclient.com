@@ -163,27 +163,28 @@
       if (!u) return ok({ error: 'auth' });
       if (!BUYABLE[plan]) return ok({ error: 'Нет такого тарифа' });
       var price = { D7: 100, D30: 300, D90: 550, D180: 800 }[plan];
-      if (pay === 'balance') {
-        if ((u.balance || 0) < price)
-          return ok({ error: 'Не хватает ' + (price - (u.balance || 0)) + ' ₽ на балансе. Пополни в кабинете.' });
-        u.balance -= price;
-        tx(d, u._key, 'sub_buy', -price, 'подписка ' + plan);
-      } else {
-        var cerr = bindCard(d, u, cardHash);
-        if (cerr) { save(d); return ok({ error: cerr }); }
-      }
-      var code = 'ETHR-' + rnd(4) + '-' + rnd(4);
-      d.keys[code] = { plan: plan, created: Date.now(), usedBy: null };
-      log(d, u._key, 'оплата ' + plan + (pay === 'balance' ? ' с баланса' : '') + ', выдан ключ ' + code);
+      if ((u.balance || 0) < price)
+        return ok({ error: 'Не хватает ' + (price - (u.balance || 0)) + ' ₽ на балансе. Пополни в кабинете.' });
+      u.balance -= price;
+      tx(d, u._key, 'sub_buy', -price, 'подписка ' + plan);
+      var days = { D7: 7, D30: 30, D90: 90, D180: 180 }[plan];
+      u.subUntil = Math.max(u.subUntil || 0, Date.now()) + days * DAY;
+      u.plan = plan;
+      log(d, u._key, 'подписка куплена с баланса: ' + plan + ' (+' + days + ' дн.)');
       save(d);
-      return ok({ code: code, plan: plan });
+      return ok({ code: 'BAL-' + rnd(4) + '-' + rnd(4), plan: plan, days: days });
     },
     hwidReset: function (t) {
       var d = load();
       var u = meByToken(d, t);
       if (!u) return ok({ error: 'auth' });
+      if (!u.hwid) return ok({ error: 'HWID ещё не привязан — сдавать нечего' });
+      if ((u.balance || 0) < 150)
+        return ok({ error: 'Не хватает ' + (150 - (u.balance || 0)) + ' ₽ на балансе. Пополни в кабинете.' });
+      u.balance -= 150;
+      tx(d, u._key, 'hwid_reset', -150, 'сброс HWID');
       u.hwid = '';
-      log(d, u._key, 'привязка HWID сброшена, привяжется при следующем запуске');
+      log(d, u._key, 'привязка HWID сброшена (150₽ с баланса), привяжется при следующем запуске');
       save(d);
       return ok({ hwid: 'bound-on-next-launch' });
     },
@@ -199,13 +200,37 @@
       if (!u) return ok({ error: 'auth' });
       amount = parseInt(amount, 10);
       if (!amount || amount < 50 || amount > 100000) return ok({ error: 'Сумма от 50 до 100000 ₽' });
-      var cerr = bindCard(d, u, cardHash);
-      if (cerr) { save(d); return ok({ error: cerr }); }
       u.balance = (u.balance || 0) + amount;
       tx(d, u._key, 'topup', amount, 'пополнение баланса');
       log(d, u._key, 'баланс пополнен на ' + amount + ' ₽');
       save(d);
       return ok({ balance: u.balance });
+    },
+    /* local demo: instantly activates, no real gateway */
+    payCreate: function (t, kind, plan, amount) {
+      var d = load();
+      var u = meByToken(d, t);
+      if (!u) return ok({ error: 'auth' });
+      if (kind === 'topup') {
+        amount = parseInt(amount, 10);
+        if (!amount || amount < 50 || amount > 100000) return ok({ error: 'Сумма от 50 до 100000 ₽' });
+        u.balance = (u.balance || 0) + amount;
+        tx(d, u._key, 'topup', amount, 'пополнение баланса');
+        log(d, u._key, 'баланс пополнен на ' + amount + ' ₽ (демо)');
+        save(d);
+        return ok({ url: '', balance: u.balance, demo: 1 });
+      }
+      if (kind === 'hwid') {
+        if (!u.hwid) return ok({ error: 'HWID ещё не привязан — сдавать нечего' });
+        if ((u.balance || 0) < 150) return ok({ error: 'Не хватает ' + (150 - (u.balance || 0)) + ' ₽ на балансе. Пополни в кабинете.' });
+        u.balance -= 150;
+        tx(d, u._key, 'hwid_reset', -150, 'сброс HWID');
+        u.hwid = '';
+        log(d, u._key, 'привязка HWID сброшена (150₽ с баланса)');
+        save(d);
+        return ok({ url: '', demo: 1 });
+      }
+      return ok({ error: 'Онлайн-оплата доступна только на боевом сервере. Пополни баланс и купи с него.' });
     },
     marketList: function (tag, q) {
       var d = load();

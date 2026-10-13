@@ -26,13 +26,48 @@ const PRICES = ['D7' => 100, 'D30' => 300, 'D90' => 550, 'D180' => 800];
 const ROLES = ['user', 'tester', 'youtube', 'tiktok', 'moderator', 'admin'];
 const NICK_RE = '/^[A-Za-z0-9_]{3,16}$/';
 const EMAIL_RE = '/^[^@\s]+@[^@\s]+\.[^@\s]+$/';
+const HWID_RESET_PRICE = 150;
 
-/* ---------- optional config (MySQL) ---------- */
+/* ---------- optional config (MySQL + YooKassa) ---------- */
 $MYSQL = ['host' => '', 'name' => '', 'user' => '', 'pass' => ''];
+$YK = ['shop_id' => '', 'secret' => ''];
 if (is_file(__DIR__ . '/config.php')) {
     $cfg = [];
-    include __DIR__ . '/config.php'; // sets $MYSQL
+    include __DIR__ . '/config.php'; // sets $MYSQL and optionally $YK
     if (!empty($cfg)) $MYSQL = array_merge($MYSQL, $cfg);
+    if (isset($cfg['yookassa_shop_id']) || isset($cfg['yookassa_secret'])) {
+        $YK = array_merge($YK, [
+            'shop_id' => (string)($cfg['yookassa_shop_id'] ?? ''),
+            'secret'  => (string)($cfg['yookassa_secret'] ?? ''),
+        ]);
+    }
+}
+function yk(): array { return $GLOBALS['YK'] ?? ['shop_id' => '', 'secret' => '']; }
+function yk_ready(): bool { $c = yk(); return $c['shop_id'] !== '' && $c['secret'] !== ''; }
+function site_base(): string {
+    $host = $_SERVER['HTTP_HOST'] ?? 'cg839385.tw1.ru';
+    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($host === 'cg839385.tw1.ru');
+    return ($https ? 'https://' : 'http://') . $host;
+}
+function yk_call(string $method, string $path, ?array $body = null): array {
+    $c = yk();
+    $ch = curl_init('https://api.yookassa.ru/v3' . $path);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 25,
+        CURLOPT_USERPWD => $c['shop_id'] . ':' . $c['secret'],
+        CURLOPT_CUSTOMREQUEST => $method,
+        CURLOPT_HTTPHEADER => ['Content-Type: application/json',
+                               'Idempotence-Key: ' . bin2hex(random_bytes(16))],
+    ]);
+    if ($body !== null) curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body, JSON_UNESCAPED_UNICODE));
+    $res = curl_exec($ch);
+    $code = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+    curl_close($ch);
+    if ($res === false || $code >= 500) out(['error' => 'Платёжный сервис недоступен. Попробуй позже.'], 502);
+    $json = json_decode((string)$res, true);
+    if (!is_array($json)) out(['error' => 'Платёжный сервис вернул ошибку.'], 502);
+    return $json + ['_http' => $code];
 }
 
 /* ---------- db layer ---------- */
@@ -105,6 +140,9 @@ function init_schema(PDO $pdo): void {
         UNIQUE(buyer_id, listing_id))");
     $pdo->exec("CREATE TABLE IF NOT EXISTS banned_hwids(
         hwid VARCHAR(32) PRIMARY KEY, by_nick TEXT, note TEXT DEFAULT '', created INTEGER)");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS payments(
+        id $ai, yk_id TEXT UNIQUE, user_id INTEGER, kind TEXT, plan TEXT,
+        amount INTEGER, status TEXT DEFAULT 'new', created INTEGER)");
     try { $pdo->exec('ALTER TABLE users ADD COLUMN banned INTEGER DEFAULT 0'); }
     catch (Throwable $e) { /* column already exists */ }
     if (!$pdo->query("SELECT 1 FROM meta WHERE k='uid_counter'")->fetch()) {
@@ -431,6 +469,49 @@ if ($path === '/api/logout') {
     out(['ok' => true]);
 }
 
+/* ---------- YooKassa webhook: payment succeeded → activate (public — YooKassa calls it without our token) ---------- */
+if ($path === '/api/pay/yookassa') {
+    $evt = $data['event'] ?? '';
+    $pid = (string)($data['object']['id'] ?? '');
+    if ($evt !== 'payment.succeeded' || $pid === '') out(['ok' => true]); // ignore other events
+    $p = yk_call('GET', '/payments/' . urlencode($pid));
+    if (($p['status'] ?? '') !== 'succeeded' || empty($p['metadata']['uid']))
+        out(['error' => 'платёж не подтверждён'], 400);
+    $uid = (int)$p['metadata']['uid'];
+    $kind = (string)($p['metadata']['kind'] ?? '');
+    $plan = (string)($p['metadata']['plan'] ?? '');
+    $amount = (int)round(((float)($p['amount']['value'] ?? 0)) * 100);
+    $pdo = db();
+    $st = $pdo->prepare('SELECT * FROM users WHERE uid=?');
+    $st->execute([$uid]);
+    $tuser = $st->fetch();
+    if (!$tuser) out(['error' => 'пользователь не найден'], 404);
+    /* idempotency: one yk payment activates once */
+    $st = $pdo->prepare('SELECT id FROM payments WHERE yk_id=?');
+    $st->execute([$pid]);
+    if ($st->fetch()) out(['ok' => true, 'already' => true]);
+    $pdo->prepare('INSERT INTO payments(yk_id,user_id,kind,plan,amount,status,created) VALUES(?,?,?,?,?,?,?)')
+        ->execute([$pid, (int)$tuser['id'], $kind, $plan ?: null, $amount, 'succeeded', time()]);
+    if ($kind === 'sub') {
+        if (!in_array($plan, BUYABLE, true)) out(['error' => 'неизвестный тариф'], 400);
+        if ($amount !== PRICES[$plan]) out(['error' => 'сумма не совпадает с тарифом'], 400);
+        $days = PLANS[$plan];
+        $base = max(time(), (int)($tuser['sub_until'] ?? 0));
+        $until = $base + $days * DAY;
+        $pdo->prepare('UPDATE users SET sub_until=?, plan=? WHERE id=?')->execute([$until, $plan, $tuser['id']]);
+        add_log($pdo, (int)$tuser['id'], "онлайн-оплата {$plan} +{$days} дн. до " . date('d.m.Y', $until) . ' (ЮKassa)');
+    } elseif ($kind === 'topup') {
+        $pdo->prepare('UPDATE users SET balance=COALESCE(balance,0)+? WHERE id=?')->execute([$amount, (int)$tuser['id']]);
+        add_tx($pdo, (int)$tuser['id'], 'topup', $amount, 'пополнение баланса (ЮKassa)');
+        add_log($pdo, (int)$tuser['id'], "баланс пополнен на {$amount} ₽ (ЮKassa)");
+    } elseif ($kind === 'hwid') {
+        if ($amount !== HWID_RESET_PRICE) out(['error' => 'сумма сброса не совпадает'], 400);
+        $pdo->prepare('UPDATE users SET hwid=NULL WHERE id=?')->execute([(int)$tuser['id']]);
+        add_log($pdo, (int)$tuser['id'], 'привязка HWID сброшена (онлайн-оплата, ЮKassa)');
+    }
+    out(['ok' => true]);
+}
+
 $u = me_or_die();
 
 if ($path === '/api/activate') {
@@ -454,28 +535,67 @@ if ($path === '/api/activate') {
 
 if ($path === '/api/buy') {
     $plan = (string)($data['plan'] ?? '');
-    $pay = (string)($data['pay'] ?? 'card');
-    $card_hash = (string)($data['card_hash'] ?? '');
-    if (!in_array($plan, BUYABLE, true)) out(['error' => 'Нет такого тарифа']);
+    $pay = (string)($data['pay'] ?? 'balance');
+    if (!in_array($plan, BUYABLE, true)) out(['error' => 'Нет такого тарифа'], 400);
+    if ($pay !== 'balance') out(['error' => 'Онлайн-оплату делай через «Картой / СБП» в окне покупки'], 400);
     $price = PRICES[$plan];
     $pdo = db();
-    if ($pay === 'balance') {
-        $st = $pdo->prepare('SELECT balance FROM users WHERE id=?');
-        $st->execute([$u['id']]);
-        $bal = (int)$st->fetch()['balance'];
-        if ($bal < $price) out(['error' => 'Не хватает ' . ($price - $bal) . ' ₽ на балансе. Пополни в кабинете.']);
-        $pdo->prepare('UPDATE users SET balance=balance-? WHERE id=?')->execute([$price, $u['id']]);
-        add_tx($pdo, (int)$u['id'], 'sub_buy', -$price, 'подписка ' . $plan);
+    $st = $pdo->prepare('SELECT balance, sub_until FROM users WHERE id=?');
+    $st->execute([$u['id']]);
+    $row = $st->fetch();
+    $bal = (int)($row['balance'] ?? 0);
+    if ($bal < $price) out(['error' => 'Не хватает ' . ($price - $bal) . ' ₽ на балансе. Пополни в кабинете.'], 400);
+    $days = PLANS[$plan];
+    $base = max(time(), (int)($row['sub_until'] ?? 0));
+    $until = $base + $days * DAY;
+    $pdo->beginTransaction();
+    $pdo->prepare('UPDATE users SET balance=balance-?, sub_until=?, plan=? WHERE id=?')
+        ->execute([$price, $until, $plan, $u['id']]);
+    add_tx($pdo, (int)$u['id'], 'sub_buy', -$price, 'подписка ' . $plan . ' (+' . $days . ' дн.)');
+    $pdo->commit();
+    add_log($pdo, (int)$u['id'], "подписка куплена с баланса: {$plan} +{$days} дн. до " . date('d.m.Y', $until));
+    out(['plan' => $plan, 'days' => $days, 'until' => $until * 1000, 'activated' => true]);
+}
+
+/* ---------- YooKassa: create an online payment (card / SBP) ---------- */
+if ($path === '/api/pay/create') {
+    $kind = (string)($data['kind'] ?? '');
+    $plan = (string)($data['plan'] ?? '');
+    $amount = (int)($data['amount'] ?? 0);
+    if (!yk_ready())
+        out(['error' => 'Онлайн-оплата временно недоступна. Пополни баланс или напиши в поддержку.'], 503);
+    if ($kind === 'sub') {
+        if (!in_array($plan, BUYABLE, true)) out(['error' => 'Нет такого тарифа']);
+        $price = PRICES[$plan];
+        $desc = 'Ethereal — подписка ' . $plan . ' (UID ' . $u['uid'] . ')';
+    } elseif ($kind === 'topup') {
+        if ($amount < 50 || $amount > 100000) out(['error' => 'Сумма от 50 до 100000 ₽']);
+        $price = $amount;
+        $plan = '';
+        $desc = 'Ethereal — пополнение баланса ' . $amount . ' ₽ (UID ' . $u['uid'] . ')';
+    } elseif ($kind === 'hwid') {
+        $price = HWID_RESET_PRICE;
+        $plan = '';
+        $desc = 'Ethereal — сброс HWID (UID ' . $u['uid'] . ')';
     } else {
-        $err = bind_card($card_hash, $u);
-        if ($err) out(['error' => $err]);
+        out(['error' => 'Неизвестный тип платежа']);
     }
-    $code = gen_key_code();
-    $pdo->prepare('INSERT INTO keys(code,plan,created,used_by) VALUES(?,?,?,NULL)')
-        ->execute([$code, $plan, time()]);
-    if ($pay === 'balance') add_log($pdo, (int)$u['id'], "оплата {$plan} с баланса, выдан ключ {$code}");
-    else add_log($pdo, (int)$u['id'], "оплата {$plan}, выдан ключ {$code} (демо)");
-    out(['code' => $code, 'plan' => $plan]);
+    $pay = yk_call('POST', '/payments', [
+        'amount' => ['value' => number_format($price, 2, '.', ''), 'currency' => 'RUB'],
+        'capture' => true,
+        'description' => $desc,
+        'confirmation' => ['type' => 'redirect', 'return_url' => site_base() . '/cabinet.html'],
+        'metadata' => ['uid' => (string)$u['uid'], 'kind' => $kind, 'plan' => $plan,
+                       'amount' => (string)$price, 'site' => 'ethereal'],
+    ]);
+    if (empty($pay['id']) || empty($pay['confirmation']['confirmation_url'])) {
+        $msg = $pay['description'] ?? ($pay['error'] ?? 'Не удалось создать платёж');
+        out(['error' => 'ЮKassa: ' . $msg], 502);
+    }
+    $pdo = db();
+    $pdo->prepare('INSERT INTO payments(yk_id,user_id,kind,plan,amount,status,created) VALUES(?,?,?,?,?,?,?)')
+        ->execute([$pay['id'], $u['id'], $kind, $plan ?: null, $price, 'waiting', time()]);
+    out(['url' => $pay['confirmation']['confirmation_url'], 'payment_id' => $pay['id']]);
 }
 
 if ($path === '/api/billing') {
@@ -494,23 +614,24 @@ if ($path === '/api/billing') {
 }
 
 if ($path === '/api/topup') {
-    $amount = (int)($data['amount'] ?? 0);
-    if ($amount < 50 || $amount > 100000) out(['error' => 'Сумма от 50 до 100000 ₽']);
-    $err = bind_card((string)($data['card_hash'] ?? ''), $u);
-    if ($err) out(['error' => $err]);
-    $pdo = db();
-    $pdo->prepare('UPDATE users SET balance=COALESCE(balance,0)+? WHERE id=?')->execute([$amount, $u['id']]);
-    add_tx($pdo, (int)$u['id'], 'topup', $amount, 'пополнение баланса');
-    add_log($pdo, (int)$u['id'], "баланс пополнен на {$amount} ₽");
-    $st = $pdo->prepare('SELECT balance FROM users WHERE id=?');
-    $st->execute([$u['id']]);
-    out(['balance' => (int)$st->fetch()['balance']]);
+    out(['error' => 'Пополняй через «Пополнить» в кабинете (ЮKassa)'], 400);
 }
 
 if ($path === '/api/hwid-reset') {
-    db()->prepare('UPDATE users SET hwid=NULL WHERE id=?')->execute([$u['id']]);
-    add_log(db(), (int)$u['id'], 'привязка HWID сброшена (оплата 150₽), привяжется при следующем запуске');
-    out(['hwid' => 'bound-on-next-launch']);
+    $pdo = db();
+    $st = $pdo->prepare('SELECT balance, hwid FROM users WHERE id=?');
+    $st->execute([$u['id']]);
+    $row = $st->fetch();
+    if (empty($row['hwid'])) out(['error' => 'HWID ещё не привязан — сдавать нечего'], 400);
+    if ((int)($row['balance'] ?? 0) < HWID_RESET_PRICE)
+        out(['error' => 'Не хватает ' . (HWID_RESET_PRICE - (int)$row['balance']) . ' ₽ на балансе. Пополни в кабинете.'], 400);
+    $pdo->beginTransaction();
+    $pdo->prepare('UPDATE users SET balance=balance-?, hwid=NULL WHERE id=?')
+        ->execute([HWID_RESET_PRICE, $u['id']]);
+    add_tx($pdo, (int)$u['id'], 'hwid_reset', -HWID_RESET_PRICE, 'сброс HWID');
+    $pdo->commit();
+    add_log($pdo, (int)$u['id'], 'привязка HWID сброшена (150₽ с баланса), привяжется при следующем запуске');
+    out(['hwid' => 'bound-on-next-launch', 'balance' => (int)$row['balance'] - HWID_RESET_PRICE]);
 }
 
 if ($path === '/api/chat') {
