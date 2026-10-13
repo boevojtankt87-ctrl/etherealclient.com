@@ -87,21 +87,28 @@ body {
   transition: background .3s, color .3s;
   -webkit-font-smoothing: antialiased;
 }
-/* animated aurora backdrop: soft accent blobs slowly drifting over pure black */
+/* animated aurora backdrop: generated wallpaper slowly panning + accent blobs */
 body::before {
-  content: ''; position: fixed; inset: -25%; z-index: 0; pointer-events: none;
+  content: ''; position: fixed; inset: -12%; z-index: 0; pointer-events: none;
   background:
     radial-gradient(38% 32% at 18% 22%, var(--acc-dim), transparent 70%),
     radial-gradient(32% 28% at 82% 18%, var(--acc-dim), transparent 72%),
     radial-gradient(42% 36% at 62% 82%, var(--acc-dim), transparent 70%),
-    radial-gradient(28% 24% at 30% 70%, var(--acc-dim), transparent 74%);
-  animation: auroraDrift 28s ease-in-out infinite alternate;
+    url('../assets/wp_ethereal.png') center 40% / 120% auto no-repeat;
+  background-blend-mode: screen, screen, screen, normal;
+  opacity: .9;
+  animation: auroraDrift 36s ease-in-out infinite alternate, bgPan 48s ease-in-out infinite alternate;
+  will-change: transform;
 }
 @keyframes auroraDrift {
   0%   { transform: translate(0, 0) scale(1); }
-  33%  { transform: translate(2.5%, -1.8%) scale(1.04); }
-  66%  { transform: translate(-2%, 1.5%) scale(1.02); }
-  100% { transform: translate(1.5%, 2.2%) scale(1.05); }
+  33%  { transform: translate(2.2%, -1.6%) scale(1.04); }
+  66%  { transform: translate(-1.8%, 1.4%) scale(1.02); }
+  100% { transform: translate(1.4%, 2%) scale(1.05); }
+}
+@keyframes bgPan {
+  0%   { background-position: 0% 38%, 0% 0, 0% 0, 30% 40%; }
+  100% { background-position: 0% 38%, 0% 0, 0% 0, 70% 55%; }
 }
 /* fine film grain over everything (static pattern, cheap) */
 body::after {

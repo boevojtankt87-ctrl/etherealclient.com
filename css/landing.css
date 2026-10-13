@@ -6,7 +6,7 @@
   margin-top: -74px; /* pull wallpaper under the sticky pill header */
   min-height: min(90vh, 860px);
   display: flex; align-items: center; justify-content: center;
-  text-align: center; padding: 200px 0 130px;
+  text-align: center; padding: 200px 0 170px;
   overflow: hidden; isolation: isolate;
 }
 .hero-bg-wrap {
@@ -27,12 +27,20 @@
 .hero-bg::after {
   content: ''; position: absolute; inset: 0;
   background: linear-gradient(to bottom,
-    rgba(6, 9, 8, .84) 0%,
-    rgba(6, 9, 8, .38) 20%,
-    rgba(6, 9, 8, .26) 42%,
-    rgba(7, 10, 9, .55) 68%,
-    rgba(9, 12, 11, .86) 86%,
-    var(--bg) 100%);
+    rgba(6, 9, 8, .86) 0%,
+    rgba(6, 9, 8, .40) 16%,
+    rgba(6, 9, 8, .20) 34%,
+    rgba(7, 10, 9, .28) 48%,
+    rgba(7, 10, 9, .50) 62%,
+    rgba(8, 11, 10, .78) 76%,
+    rgba(9, 12, 11, .94) 88%,
+    var(--bg) 96%);
+}
+/* extra bottom fade: guarantees a seamless melt into the page backdrop */
+.hero::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 320px;
+  z-index: 0; pointer-events: none;
+  background: linear-gradient(to bottom, transparent 0%, rgba(10, 13, 12, .55) 45%, var(--bg) 92%);
 }
 /* vignette + forest-glow accent behind the text */
 .hero-veil {
