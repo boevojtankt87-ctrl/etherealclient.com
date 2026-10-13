@@ -14,7 +14,7 @@
   function blank() {
     return { users: {}, counter: 1, keys: {}, cards: {}, sessions: {},
              chat: [], listings: [], seq: 1, purchases: [], txs: {},
-             logs: {}, builds: null, polls: null, votes: [] };
+             logs: {}, builds: null, polls: null, votes: [], hwidBans: {} };
   }
   function load() {
     try {
@@ -75,7 +75,8 @@
 
   function pub(u) {
     return { name: u.name, uid: u.uid, role: u.role, email: u.email, balance: u.balance || 0,
-             hwid: u.hwid, created: u.created, subUntil: u.subUntil || 0, plan: u.plan || null };
+             hwid: u.hwid, created: u.created, subUntil: u.subUntil || 0, plan: u.plan || null,
+             banned: u.banned || 0 };
   }
   function log(d, key, msg) {
     d.logs[key] = d.logs[key] || [];
@@ -414,6 +415,117 @@
       if (!v || !title || !text) return ok({ error: 'Заполни версию, заголовок и текст' });
       d.builds.unshift({ version: v.slice(0, 16), title: title.slice(0, 120),
                          text: text.slice(0, 2000), date: fmtDate(Date.now()) });
+      save(d);
+      return ok({ ok: true });
+    },
+    adminUsers: function (t) {
+      var d = load();
+      var u = meByToken(d, t);
+      if (!u || u.role !== 'admin') return ok({ error: 'Только для админа' });
+      d.hwidBans = d.hwidBans || {};
+      var now = Date.now(); var active = 0; var users = [];
+      for (var k in d.users) {
+        var x = d.users[k];
+        var left = Math.max(0, (x.subUntil || 0) - now);
+        if (left > 0) active++;
+        users.push({ id: x.uid, uid: x.uid, name: x.name, key: k, email: x.email || '', role: x.role,
+                     plan: x.plan || null, subUntil: x.subUntil || 0, leftMs: left,
+                     hwid: x.hwid || '', balance: x.balance || 0, banned: x.banned || 0,
+                     created: x.created });
+      }
+      users.sort(function (a, b) { return a.uid - b.uid; });
+      var hwids = [];
+      for (var h in d.hwidBans) {
+        hwids.push({ hwid: h, by: d.hwidBans[h].by || 'admin', note: d.hwidBans[h].note || '',
+                     date: fmtDate(d.hwidBans[h].ts || now) });
+      }
+      var unused = 0;
+      for (var c in d.keys) if (!d.keys[c].used) unused++;
+      return ok({ total: users.length, active: active, unusedKeys: unused, users: users, hwids: hwids });
+    },
+    adminFind: function (t, nick) {
+      var d = load();
+      var u = meByToken(d, t);
+      if (!u || u.role !== 'admin') return ok({ error: 'Только для админа' });
+      var x = d.users[(nick || '').toLowerCase()];
+      if (!x) return ok({ error: 'Пользователь не найден' });
+      return ok({ user: pub(x) });
+    },
+    adminBan: function (t, nick, banned) {
+      var d = load();
+      var u = meByToken(d, t);
+      if (!u || u.role !== 'admin') return ok({ error: 'Только для админа' });
+      var key = (nick || '').toLowerCase();
+      var x = d.users[key];
+      if (!x) return ok({ error: 'Пользователь не найден' });
+      if (key === u.name.toLowerCase()) return ok({ error: 'Нельзя забанить себя' });
+      if (banned && x.role === 'admin') return ok({ error: 'Нельзя забанить админа' });
+      x.banned = banned ? 1 : 0;
+      if (banned) for (var s in d.sessions) if (d.sessions[s].key === key) delete d.sessions[s];
+      log(d, key, banned ? 'аккаунт заблокирован (' + u.name + ')' : 'аккаунт разблокирован (' + u.name + ')');
+      save(d);
+      return ok({ ok: true, banned: x.banned });
+    },
+    adminBanHwid: function (t, hwid, banned) {
+      var d = load();
+      var u = meByToken(d, t);
+      if (!u || u.role !== 'admin') return ok({ error: 'Только для админа' });
+      hwid = String(hwid || '').toUpperCase().trim();
+      if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(hwid))
+        return ok({ error: 'Формат HWID: XXXX-XXXX-XXXX' });
+      d.hwidBans = d.hwidBans || {};
+      if (banned) d.hwidBans[hwid] = { by: u.name, ts: Date.now() };
+      else delete d.hwidBans[hwid];
+      save(d);
+      return ok({ ok: true, banned: banned ? 1 : 0 });
+    },
+    adminSub: function (t, nick, days) {
+      var d = load();
+      var u = meByToken(d, t);
+      if (!u || u.role !== 'admin') return ok({ error: 'Только для админа' });
+      days = days | 0;
+      if (days < 0 || days > 3650) return ok({ error: 'Дни: от 0 до 3650 (0 = снять подписку)' });
+      var key = (nick || '').toLowerCase();
+      var x = d.users[key];
+      if (!x) return ok({ error: 'Пользователь не найден' });
+      if (days === 0) {
+        x.subUntil = Date.now(); x.plan = null;
+        log(d, key, 'подписка снята (' + u.name + ')');
+        save(d);
+        return ok({ ok: true, subUntil: x.subUntil, plan: null });
+      }
+      var base = Math.max(Date.now(), x.subUntil || 0);
+      x.subUntil = base + days * DAY;
+      x.plan = x.plan || 'D30';
+      log(d, key, 'подписка продлена +' + days + ' дн. (' + u.name + ')');
+      save(d);
+      return ok({ ok: true, subUntil: x.subUntil, plan: x.plan });
+    },
+    adminBalance: function (t, nick, amount) {
+      var d = load();
+      var u = meByToken(d, t);
+      if (!u || u.role !== 'admin') return ok({ error: 'Только для админа' });
+      amount = amount | 0;
+      if (!amount || amount < -1000000 || amount > 1000000)
+        return ok({ error: 'Сумма: от -1000000 до 1000000, не 0' });
+      var key = (nick || '').toLowerCase();
+      var x = d.users[key];
+      if (!x) return ok({ error: 'Пользователь не найден' });
+      x.balance = (x.balance || 0) + amount;
+      tx(d, key, 'admin_adjust', amount, 'корректировка баланса (' + u.name + ')');
+      log(d, key, 'баланс ' + (amount > 0 ? '+' : '') + amount + ' ₽ (' + u.name + ')');
+      save(d);
+      return ok({ ok: true, balance: x.balance });
+    },
+    adminHwidReset: function (t, nick) {
+      var d = load();
+      var u = meByToken(d, t);
+      if (!u || u.role !== 'admin') return ok({ error: 'Только для админа' });
+      var key = (nick || '').toLowerCase();
+      var x = d.users[key];
+      if (!x) return ok({ error: 'Пользователь не найден' });
+      x.hwid = '';
+      log(d, key, 'привязка HWID сброшена администратором (' + u.name + ')');
       save(d);
       return ok({ ok: true });
     },

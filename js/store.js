@@ -76,6 +76,19 @@
     post: function (t, text) { return apiFetch('/api/chat', { text: text }); },
     builds: function () { return apiFetch('/api/builds').then(function (r) { return r.builds || []; }); },
     adminOverview: function () { return apiFetch('/api/admin/overview'); },
+    adminUsers: function () { return apiFetch('/api/admin/users'); },
+    adminFind: function (t, nick) { return apiFetch('/api/admin/find', { nick: nick }); },
+    adminBan: function (t, nick, banned) {
+      return apiFetch('/api/admin/ban', { nick: nick, banned: banned ? 1 : 0 });
+    },
+    adminBanHwid: function (t, hwid, banned) {
+      return apiFetch('/api/admin/ban-hwid', { hwid: hwid, banned: banned ? 1 : 0 });
+    },
+    adminSub: function (t, nick, days) { return apiFetch('/api/admin/sub', { nick: nick, days: days }); },
+    adminBalance: function (t, nick, amount) {
+      return apiFetch('/api/admin/balance', { nick: nick, amount: amount });
+    },
+    adminHwidReset: function (t, nick) { return apiFetch('/api/admin/hwid-reset', { nick: nick }); },
     adminKey: function (t, plan) { return apiFetch('/api/admin/key', { plan: plan }); },
     adminRole: function (t, nick, role) { return apiFetch('/api/admin/role', { nick: nick, role: role }); },
     adminDelete: function (t, nick) { return apiFetch('/api/admin/delete', { nick: nick }); },
@@ -172,7 +185,8 @@
   ['me', 'activate', 'buy', 'billing', 'hwidReset', 'topup',
    'marketCreate',
    'marketBuy', 'marketMy', 'marketConfig', 'marketToggle', 'chat', 'post',
-   'builds', 'adminOverview', 'adminKey', 'adminRole',
+   'builds', 'adminOverview', 'adminUsers', 'adminFind', 'adminBan', 'adminBanHwid',
+   'adminSub', 'adminBalance', 'adminHwidReset', 'adminKey', 'adminRole',
    'adminDelete', 'adminBuild'
   ].forEach(function (name) {
     S[name] = function () { return call(name, T(arguments)); };

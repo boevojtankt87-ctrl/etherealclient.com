@@ -4,23 +4,7 @@
   var S = window.EthStore;
   var CFG = window.EthConfig || { CONTACTS: {} };
 
-  /* static background grid */
-  (function () {
-    var c = document.getElementById('bg');
-    if (!c) return;
-    var x = c.getContext('2d'), W, H;
-    function rs() { W = c.width = innerWidth; H = c.height = innerHeight; }
-    rs(); addEventListener('resize', rs);
-    x.clearRect(0, 0, W, H);
-    var acc = getComputedStyle(document.documentElement).getPropertyValue('--acc').trim() || '#4eba8e';
-    x.strokeStyle = acc + '12';
-    x.lineWidth = 1;
-    var step = 72;
-    x.beginPath();
-    for (var gx = 0; gx < W + step; gx += step) { x.moveTo(gx, 0); x.lineTo(gx, H); }
-    for (var gy = 0; gy < H + step; gy += step) { x.moveTo(0, gy); x.lineTo(W, gy); }
-    x.stroke();
-  })();
+  /* static background grid removed — Minecraft tiled stone (base.css body::before) + hero wallpaper cover the page */
 
   /* reveal */
   var io = new IntersectionObserver(function (es) {

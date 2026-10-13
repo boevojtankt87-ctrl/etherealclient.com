@@ -74,6 +74,9 @@
     if (me.role !== 'admin') {
       var at = document.querySelector('[data-tab="admin"]');
       if (at) at.classList.add('hidden');
+    } else if (location.hash === '#admin') {
+      var atab = document.querySelector('[data-tab="admin"]');
+      if (atab) atab.click();
     }
     renderProfile();
 
@@ -312,25 +315,47 @@
   }
 
   /* ---------- admin ---------- */
+  var selUser = null;
+
   function renderAdmin() {
     if (!me || me.role !== 'admin') return;
-    S.adminOverview().then(function (r) {
+    S.adminUsers().then(function (r) {
       if (r.error) { toast(r.error, true); return; }
       document.getElementById('stUsers').textContent = r.total;
       document.getElementById('stActive').textContent = r.active;
       document.getElementById('stKeys').textContent = r.unusedKeys;
       var tb = document.getElementById('usersBody');
       tb.innerHTML = '';
-      r.users.forEach(function (u) {
+      var q = (document.getElementById('adminSearch').value || '').toLowerCase().trim();
+      (r.users || []).forEach(function (u) {
+        if (q && String(u.name).toLowerCase().indexOf(q) === -1) return;
         var tr = document.createElement('tr');
+        tr.className = 'urow' + (u.banned ? ' banned' : '') + (selUser && selUser.key === u.key ? ' sel' : '');
+        tr.dataset.key = u.key;
         var sel = '<select data-u="' + S.esc(u.key) + '">' + S.ROLES.map(function (role) {
           return '<option value="' + role + '"' + (u.role === role ? ' selected' : '') + '>' + role + '</option>';
         }).join('') + '</select>';
         var sub = u.leftMs > 0 ? (S.esc(u.plan || '') + ' · ' + S.fmtLeft(u.leftMs)) : '—';
-        tr.innerHTML = '<td><b>' + S.esc(u.name) + '</b></td><td>#' + u.uid + '</td>' +
+        tr.innerHTML =
+          '<td><b>' + S.esc(u.name) + '</b></td><td>#' + u.uid + '</td>' +
           '<td>' + sel + '</td><td>' + sub + '</td>' +
+          '<td class="mono hwid-cell" title="' + S.esc(u.hwid || '') + '">' +
+            (u.hwid ? S.esc(u.hwid.slice(0, 9)) + '…' : '—') + '</td>' +
+          '<td>' + (u.balance || 0) + ' ₽</td>' +
+          '<td>' + (u.banned ? '<span class="ban-badge">БАН</span>' : '<span class="ok-badge">ok</span>') + '</td>' +
           '<td><button class="del" data-del="' + S.esc(u.key) + '">удалить</button></td>';
         tb.appendChild(tr);
+      });
+      tb.querySelectorAll('tr.urow').forEach(function (tr) {
+        tr.addEventListener('click', function (e) {
+          if (e.target.closest('select') || e.target.closest('button')) return;
+          var u = (r.users || []).filter(function (x) { return x.key === tr.dataset.key; })[0];
+          if (!u) return;
+          selUser = u;
+          tb.querySelectorAll('tr').forEach(function (x) { x.classList.remove('sel'); });
+          tr.classList.add('sel');
+          paintAdminSel();
+        });
       });
       tb.querySelectorAll('select').forEach(function (sel) {
         sel.addEventListener('change', function () {
@@ -347,10 +372,94 @@
           S.adminDelete(b.dataset.del).then(function (res) {
             if (res.error) toast(res.error, true);
             else toast('Пользователь удалён');
+            selUser = null;
             renderAdmin();
           });
         });
       });
+      var hw = document.getElementById('hwidBody');
+      hw.innerHTML = '';
+      (r.hwids || []).forEach(function (h) {
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td class="mono">' + S.esc(h.hwid) + '</td><td>' + S.esc(h.by || '—') +
+          '</td><td>' + S.esc(h.date || '—') +
+          '</td><td><button class="del" data-unban-hwid="' + S.esc(h.hwid) + '">разбанить</button></td>';
+        hw.appendChild(tr);
+      });
+      hw.querySelectorAll('[data-unban-hwid]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          S.adminBanHwid(b.dataset.unbanHwid, false).then(function (res) {
+            if (res.error) toast(res.error, true); else toast('HWID разблокирован');
+            renderAdmin();
+          });
+        });
+      });
+      paintAdminSel();
     });
   }
+
+  function paintAdminSel() {
+    var box = document.getElementById('adminSel');
+    if (!selUser) { box.classList.add('hidden'); return; }
+    box.classList.remove('hidden');
+    document.getElementById('selNick').textContent = selUser.name;
+    document.getElementById('selUid').textContent = '#' + selUser.uid;
+    document.getElementById('selSub').textContent =
+      selUser.leftMs > 0 ? (selUser.plan || '') + ' · ' + S.fmtLeft(selUser.leftMs) : 'нет';
+    document.getElementById('selBal').textContent = (selUser.balance || 0) + ' ₽';
+    document.getElementById('selHwid').textContent = selUser.hwid || 'не привязан';
+    box.querySelector('[data-act="ban"]').style.display = selUser.banned ? 'none' : '';
+    box.querySelector('[data-act="unban"]').style.display = selUser.banned ? '' : 'none';
+  }
+
+  function adminAct(act) {
+    if (!selUser) return;
+    var key = selUser.key;
+    var p = null;
+    if (act === 'sub') {
+      var days = parseInt(document.getElementById('selDays').value, 10) || 0;
+      p = S.adminSub(key, days);
+    } else if (act === 'unsub') {
+      if (!confirm('Снять подписку у ' + key + '?')) return;
+      p = S.adminSub(key, 0);
+    } else if (act === 'bal-plus' || act === 'bal-minus') {
+      var amt = parseInt(document.getElementById('selAmount').value, 10) || 0;
+      if (!amt) { toast('Введите сумму', true); return; }
+      p = S.adminBalance(key, act === 'bal-plus' ? amt : -amt);
+    } else if (act === 'hwid-reset') {
+      if (!selUser.hwid) { toast('HWID не привязан', true); return; }
+      p = S.adminHwidReset(key);
+    } else if (act === 'ban-hwid') {
+      if (!selUser.hwid) { toast('HWID не привязан', true); return; }
+      p = S.adminBanHwid(selUser.hwid, true);
+    } else if (act === 'ban' || act === 'unban') {
+      p = S.adminBan(key, act === 'ban');
+    } else if (act === 'delete') {
+      if (!confirm('Удалить пользователя ' + key + '?')) return;
+      p = S.adminDelete(key);
+    }
+    if (!p) return;
+    p.then(function (res) {
+      if (res.error) { toast(res.error, true); return; }
+      toast('Готово: ' + key);
+      selUser = null;
+      renderAdmin();
+    });
+  }
+
+  var adminSelBox = document.getElementById('adminSel');
+  if (adminSelBox) adminSelBox.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]');
+    if (b) adminAct(b.dataset.act);
+  });
+  var searchEl = document.getElementById('adminSearch');
+  if (searchEl) searchEl.addEventListener('input', function () { renderAdmin(); });
+  var hwidBtn = document.getElementById('banHwidBtn');
+  if (hwidBtn) hwidBtn.addEventListener('click', function () {
+    var v = (document.getElementById('banHwidInput').value || '').toUpperCase().trim();
+    if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(v)) { toast('Формат: XXXX-XXXX-XXXX', true); return; }
+    S.adminBanHwid(v, true).then(function (res) {
+      if (res.error) toast(res.error, true); else { toast('HWID заблокирован'); renderAdmin(); }
+    });
+  });
 })();

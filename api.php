@@ -81,7 +81,7 @@ function init_schema(PDO $pdo): void {
         id $ai, uid INTEGER UNIQUE, nick TEXT UNIQUE, pass TEXT, role TEXT,
         hwid TEXT, created INTEGER, sub_until INTEGER DEFAULT 0, plan TEXT,
         email TEXT DEFAULT '', trial_used INTEGER DEFAULT 0,
-        balance INTEGER DEFAULT 0)");
+        balance INTEGER DEFAULT 0, banned INTEGER DEFAULT 0)");
     $pdo->exec("CREATE TABLE IF NOT EXISTS sessions(
         token VARCHAR(64) PRIMARY KEY, user_id INTEGER, created INTEGER, last_seen INTEGER DEFAULT 0)");
     $pdo->exec("CREATE TABLE IF NOT EXISTS keys(
@@ -103,6 +103,10 @@ function init_schema(PDO $pdo): void {
     $pdo->exec("CREATE TABLE IF NOT EXISTS purchases(
         buyer_id INTEGER, listing_id INTEGER, price INTEGER, ts INTEGER,
         UNIQUE(buyer_id, listing_id))");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS banned_hwids(
+        hwid VARCHAR(32) PRIMARY KEY, by_nick TEXT, note TEXT DEFAULT '', created INTEGER)");
+    try { $pdo->exec('ALTER TABLE users ADD COLUMN banned INTEGER DEFAULT 0'); }
+    catch (Throwable $e) { /* column already exists */ }
     if (!$pdo->query("SELECT 1 FROM meta WHERE k='uid_counter'")->fetch()) {
         $pdo->prepare("INSERT INTO meta(k,v) VALUES('uid_counter','1')")->execute();
     }
@@ -166,7 +170,8 @@ function public_user(array $u): array {
     return ['name' => $u['nick'], 'uid' => (int)$u['uid'], 'role' => $u['role'],
             'email' => $u['email'] ?? '', 'balance' => (int)($u['balance'] ?? 0),
             'hwid' => $u['hwid'], 'created' => (int)$u['created'] * 1000,
-            'subUntil' => (int)($u['sub_until'] ?? 0) * 1000, 'plan' => $u['plan']];
+            'subUntil' => (int)($u['sub_until'] ?? 0) * 1000, 'plan' => $u['plan'],
+            'banned' => (int)($u['banned'] ?? 0)];
 }
 function user_by_token(string $token): ?array {
     if ($token === '') return null;
@@ -182,6 +187,7 @@ function user_by_token(string $token): ?array {
 function me_or_die(): array {
     $u = user_by_token(reqToken());
     if (!$u) out(['error' => 'auth'], 401);
+    if ((int)($u['banned'] ?? 0)) out(['error' => 'Аккаунт заблокирован администратором'], 403);
     return $u;
 }
 function admin_or_die(array $u): void {
@@ -323,6 +329,33 @@ if ($method === 'GET') {
         }
         out(['total' => count($outUsers), 'active' => $active, 'unusedKeys' => $unused, 'users' => $outUsers]);
     }
+    if ($path === '/api/admin/users') {
+        $u = me_or_die();
+        admin_or_die($u);
+        $pdo = db();
+        $rows = $pdo->query('SELECT * FROM users ORDER BY uid')->fetchAll();
+        $now = time();
+        $active = 0; $users = [];
+        foreach ($rows as $x) {
+            $left = max(0, (int)($x['sub_until'] ?? 0) - $now);
+            if ($left > 0) $active++;
+            $users[] = ['id' => (int)$x['id'], 'uid' => (int)$x['uid'], 'name' => $x['nick'],
+                'key' => strtolower($x['nick']),
+                'email' => $x['email'] ?? '', 'role' => $x['role'], 'plan' => $x['plan'],
+                'subUntil' => (int)($x['sub_until'] ?? 0) * 1000, 'leftMs' => $left * 1000,
+                'hwid' => $x['hwid'] ?: '', 'balance' => (int)($x['balance'] ?? 0),
+                'banned' => (int)($x['banned'] ?? 0), 'created' => (int)$x['created'] * 1000];
+        }
+        $hw = $pdo->query('SELECT * FROM banned_hwids ORDER BY created DESC LIMIT 200')->fetchAll();
+        $hwids = [];
+        foreach ($hw as $r) {
+            $hwids[] = ['hwid' => $r['hwid'], 'by' => $r['by_nick'], 'note' => $r['note'] ?? '',
+                        'date' => md1($r['created'])];
+        }
+        $unused = (int)$pdo->query('SELECT COUNT(*) c FROM keys WHERE used_by IS NULL')->fetch()['c'];
+        out(['total' => count($users), 'active' => $active, 'unusedKeys' => $unused,
+             'users' => $users, 'hwids' => $hwids]);
+    }
     out(['error' => 'unknown'], 404);
 }
 
@@ -366,6 +399,8 @@ if ($path === '/api/login') {
     $u = $st->fetch();
     if (!$u || !check_pass((string)($data['pass'] ?? ''), $u['pass']))
         out(['error' => 'Неверный ник или пароль']);
+    if ((int)($u['banned'] ?? 0))
+        out(['error' => 'Аккаунт заблокирован администратором. Напиши в поддержку.'], 403);
     $token = bin2hex(random_bytes(24));
     $pdo = db();
     $pdo->prepare('INSERT INTO sessions(token,user_id,created,last_seen) VALUES(?,?,?,?)')
@@ -491,6 +526,12 @@ if ($path === '/api/client-launch') {
     if (!preg_match('/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/', $hwid))
         out(['error' => 'Лаунчер передал пустой HWID']);
     $pdo = db();
+    if ((int)($u['banned'] ?? 0))
+        out(['error' => 'Аккаунт заблокирован администратором'], 403);
+    $st = $pdo->prepare('SELECT 1 FROM banned_hwids WHERE hwid=?');
+    $st->execute([$hwid]);
+    if ($st->fetch())
+        out(['error' => 'Это устройство заблокировано'], 403);
     $st = $pdo->prepare('SELECT hwid FROM users WHERE id=?');
     $st->execute([$u['id']]);
     $cur = $st->fetch()['hwid'];
@@ -652,6 +693,112 @@ if ($path === '/api/admin/build') {
         out(['error' => 'Заполни версию, заголовок и текст']);
     db()->prepare('INSERT INTO builds(version,title,text,ts) VALUES(?,?,?,?)')
         ->execute([$version, $title, $text, time()]);
+    out(['ok' => true]);
+}
+if ($path === '/api/admin/find') {
+    admin_or_die($u);
+    $nick = strtolower(trim((string)($data['nick'] ?? '')));
+    $st = db()->prepare('SELECT * FROM users WHERE LOWER(nick)=?');
+    $st->execute([$nick]);
+    $x = $st->fetch();
+    if (!$x) out(['error' => 'Пользователь не найден']);
+    $now = time();
+    $left = max(0, (int)($x['sub_until'] ?? 0) - $now);
+    out(['user' => ['id' => (int)$x['id'], 'uid' => (int)$x['uid'], 'name' => $x['nick'],
+        'role' => $x['role'], 'plan' => $x['plan'], 'leftMs' => $left * 1000,
+        'hwid' => $x['hwid'] ?: '', 'balance' => (int)($x['balance'] ?? 0),
+        'banned' => (int)($x['banned'] ?? 0)]]);
+}
+if ($path === '/api/admin/ban') {
+    admin_or_die($u);
+    $nick = strtolower(trim((string)($data['nick'] ?? '')));
+    $banned = !empty($data['banned']) ? 1 : 0;
+    $pdo = db();
+    $st = $pdo->prepare('SELECT * FROM users WHERE LOWER(nick)=?');
+    $st->execute([$nick]);
+    $x = $st->fetch();
+    if (!$x) out(['error' => 'Пользователь не найден']);
+    if ((int)$x['id'] === (int)$u['id']) out(['error' => 'Нельзя забанить себя']);
+    if ($banned && ($x['role'] ?? '') === 'admin') out(['error' => 'Нельзя забанить админа']);
+    $pdo->prepare('UPDATE users SET banned=? WHERE id=?')->execute([$banned, $x['id']]);
+    if ($banned) $pdo->prepare('DELETE FROM sessions WHERE user_id=?')->execute([$x['id']]);
+    add_log($pdo, (int)$x['id'], $banned ? 'аккаунт заблокирован (' . $u['nick'] . ')' : 'аккаунт разблокирован (' . $u['nick'] . ')');
+    out(['ok' => true, 'banned' => $banned]);
+}
+if ($path === '/api/admin/ban-hwid') {
+    admin_or_die($u);
+    $hwid = strtoupper(trim((string)($data['hwid'] ?? '')));
+    $banned = !empty($data['banned']);
+    if (!preg_match('/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/', $hwid))
+        out(['error' => 'Формат HWID: XXXX-XXXX-XXXX']);
+    $pdo = db();
+    if ($banned) {
+        $st = $pdo->prepare('INSERT OR IGNORE INTO banned_hwids(hwid,by_nick,note,created) VALUES(?,?,?,?)');
+        if (my()) {
+            $st = $pdo->prepare('INSERT INTO banned_hwids(hwid,by_nick,note,created) VALUES(?,?,?,?)
+                                 ON DUPLICATE KEY UPDATE by_nick=VALUES(by_nick)');
+        }
+        $st->execute([$hwid, $u['nick'], (string)($data['note'] ?? ''), time()]);
+        $st = $pdo->prepare('SELECT id,nick FROM users WHERE hwid=?');
+        $st->execute([$hwid]);
+        foreach ($st->fetchAll() as $owner) {
+            add_log($pdo, (int)$owner['id'], 'устройство ' . $hwid . ' заблокировано (' . $u['nick'] . ')');
+        }
+    } else {
+        $pdo->prepare('DELETE FROM banned_hwids WHERE hwid=?')->execute([$hwid]);
+    }
+    out(['ok' => true, 'banned' => $banned ? 1 : 0]);
+}
+if ($path === '/api/admin/sub') {
+    admin_or_die($u);
+    $nick = strtolower(trim((string)($data['nick'] ?? '')));
+    $days = (int)($data['days'] ?? 0);
+    if ($days < 0 || $days > 3650) out(['error' => 'Дни: от 0 до 3650 (0 = снять подписку)']);
+    $pdo = db();
+    $st = $pdo->prepare('SELECT * FROM users WHERE LOWER(nick)=?');
+    $st->execute([$nick]);
+    $x = $st->fetch();
+    if (!$x) out(['error' => 'Пользователь не найден']);
+    if ($days === 0) {
+        $pdo->prepare('UPDATE users SET sub_until=?, plan=NULL WHERE id=?')->execute([time(), $x['id']]);
+        add_log($pdo, (int)$x['id'], 'подписка снята (' . $u['nick'] . ')');
+        out(['ok' => true, 'subUntil' => time() * 1000, 'plan' => null]);
+    }
+    $base = max(time(), (int)($x['sub_until'] ?? 0));
+    $until = $base + $days * DAY;
+    $plan = $x['plan'] ?: 'D30';
+    $pdo->prepare('UPDATE users SET sub_until=?, plan=? WHERE id=?')->execute([$until, $plan, $x['id']]);
+    add_log($pdo, (int)$x['id'], "подписка продлена +{$days} дн. → до " . date('d.m.Y', $until) . ' (' . $u['nick'] . ')');
+    out(['ok' => true, 'subUntil' => $until * 1000, 'plan' => $plan]);
+}
+if ($path === '/api/admin/balance') {
+    admin_or_die($u);
+    $nick = strtolower(trim((string)($data['nick'] ?? '')));
+    $amount = (int)($data['amount'] ?? 0);
+    if ($amount === 0 || $amount < -1000000 || $amount > 1000000)
+        out(['error' => 'Сумма: от -1000000 до 1000000, не 0']);
+    $pdo = db();
+    $st = $pdo->prepare('SELECT * FROM users WHERE LOWER(nick)=?');
+    $st->execute([$nick]);
+    $x = $st->fetch();
+    if (!$x) out(['error' => 'Пользователь не найден']);
+    $pdo->prepare('UPDATE users SET balance=COALESCE(balance,0)+? WHERE id=?')->execute([$amount, $x['id']]);
+    add_tx($pdo, (int)$x['id'], 'admin_adjust', $amount, 'корректировка баланса (' . $u['nick'] . ')');
+    add_log($pdo, (int)$x['id'], 'баланс ' . ($amount > 0 ? '+' : '') . $amount . ' ₽ (' . $u['nick'] . ')');
+    $st = $pdo->prepare('SELECT balance FROM users WHERE id=?');
+    $st->execute([$x['id']]);
+    out(['ok' => true, 'balance' => (int)$st->fetch()['balance']]);
+}
+if ($path === '/api/admin/hwid-reset') {
+    admin_or_die($u);
+    $nick = strtolower(trim((string)($data['nick'] ?? '')));
+    $pdo = db();
+    $st = $pdo->prepare('SELECT * FROM users WHERE LOWER(nick)=?');
+    $st->execute([$nick]);
+    $x = $st->fetch();
+    if (!$x) out(['error' => 'Пользователь не найден']);
+    $pdo->prepare('UPDATE users SET hwid=NULL WHERE id=?')->execute([$x['id']]);
+    add_log($pdo, (int)$x['id'], 'привязка HWID сброшена администратором (' . $u['nick'] . ')');
     out(['ok' => true]);
 }
 

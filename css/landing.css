@@ -1,12 +1,12 @@
 /* Ethereal — landing: wallpaper hero + glass surfaces */
-#bg { position: fixed; inset: 0; z-index: 0; opacity: .4; pointer-events: none; }
 
 /* ==================== HERO ==================== */
 .hero {
   position: relative; z-index: 1;
+  margin-top: -74px; /* pull wallpaper under the sticky pill header */
   min-height: min(90vh, 860px);
   display: flex; align-items: center; justify-content: center;
-  text-align: center; padding: 140px 0 130px;
+  text-align: center; padding: 200px 0 130px;
   overflow: hidden; isolation: isolate;
 }
 .hero-bg {
@@ -228,17 +228,16 @@
   position: relative; overflow: hidden;
   background:
     radial-gradient(95% 130% at 50% 125%, rgba(78, 186, 142, .3), transparent 62%),
-    linear-gradient(180deg, #0e1312, #0a0e0d);
+    url('../assets/tile_card.png');
+  background-size: auto, 48px 48px;
+  background-blend-mode: normal, normal;
+  image-rendering: pixelated;
   border-bottom: 1px solid var(--line);
 }
 .product-vis::before {
   content: ''; position: absolute; inset: 0;
-  background:
-    linear-gradient(rgba(255, 255, 255, .04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, .04) 1px, transparent 1px);
-  background-size: 26px 26px;
-  mask-image: radial-gradient(85% 85% at 50% 55%, #000 30%, transparent 100%);
-  -webkit-mask-image: radial-gradient(85% 85% at 50% 55%, #000 30%, transparent 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .04), inset 3px 3px 0 rgba(255, 255, 255, .05), inset -3px -3px 0 rgba(0, 0, 0, .4);
+  pointer-events: none;
 }
 .product-vis b {
   position: relative; font-size: 34px; font-weight: 800; letter-spacing: -1.5px;
@@ -455,7 +454,7 @@ header { animation: headerIn .7s cubic-bezier(.2, .7, .2, 1) both; }
 }
 
 @media (max-width: 900px) {
-  .hero { padding: 120px 0 110px; min-height: 78vh; }
+  .hero { margin-top: -64px; padding: 150px 0 110px; min-height: 78vh; }
   .hero-scroll { display: none; }
   .stats-bar { margin-top: -44px; }
   .adv-grid, .contact-grid { grid-template-columns: 1fr; }

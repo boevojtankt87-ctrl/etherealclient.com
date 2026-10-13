@@ -239,10 +239,54 @@
         </div>
         <div class="admin-sec">
           <h4>Пользователи</h4>
-          <table class="users-table">
-            <thead><tr><th>Ник</th><th>UID</th><th>Роль</th><th>Подписка</th><th></th></tr></thead>
-            <tbody id="usersBody"></tbody>
-          </table>
+          <div class="gen-row" style="margin-bottom:10px">
+            <input id="adminSearch" placeholder="Поиск по нику…" style="flex:1;min-width:180px">
+          </div>
+          <div class="table-scroll">
+            <table class="users-table">
+              <thead><tr><th>Ник</th><th>UID</th><th>Роль</th><th>Подписка</th><th>HWID</th><th>Баланс</th><th>Статус</th><th></th></tr></thead>
+              <tbody id="usersBody"></tbody>
+            </table>
+          </div>
+          <div id="adminSel" class="admin-sel hidden">
+            <div class="sel-head">Панель пользователя: <b id="selNick">—</b> <span id="selUid" class="mono"></span></div>
+            <div class="sel-row">
+              <span class="sel-lbl">Подписка:</span> <b id="selSub">—</b>
+              <input id="selDays" type="number" min="0" max="3650" value="30" style="width:84px">
+              <button class="btn-mini" data-act="sub">+ дней</button>
+              <button class="btn-mini danger" data-act="unsub">Снять подписку</button>
+            </div>
+            <div class="sel-row">
+              <span class="sel-lbl">Баланс:</span> <b id="selBal">—</b>
+              <input id="selAmount" type="number" step="50" value="100" style="width:110px">
+              <button class="btn-mini" data-act="bal-plus">Пополнить</button>
+              <button class="btn-mini danger" data-act="bal-minus">Списать</button>
+            </div>
+            <div class="sel-row">
+              <span class="sel-lbl">HWID:</span> <b id="selHwid" class="mono">—</b>
+              <button class="btn-mini" data-act="hwid-reset">Сбросить HWID</button>
+              <button class="btn-mini danger" data-act="ban-hwid">Бан HWID</button>
+            </div>
+            <div class="sel-row">
+              <button class="btn-mini danger" data-act="ban">Забанить аккаунт</button>
+              <button class="btn-mini" data-act="unban" style="display:none">Разбанить аккаунт</button>
+              <button class="btn-mini danger" data-act="delete">Удалить аккаунт</button>
+            </div>
+          </div>
+          <p class="cab-hint">Клик по строке — открыть панель действий.</p>
+        </div>
+        <div class="admin-sec">
+          <h4>Бан HWID</h4>
+          <div class="gen-row" style="margin-bottom:10px">
+            <input id="banHwidInput" placeholder="XXXX-XXXX-XXXX" style="max-width:180px">
+            <button class="btn btn-solid" id="banHwidBtn">Забанить HWID</button>
+          </div>
+          <div class="table-scroll">
+            <table class="users-table">
+              <thead><tr><th>HWID</th><th>Кем</th><th>Дата</th><th></th></tr></thead>
+              <tbody id="hwidBody"></tbody>
+            </table>
+          </div>
         </div>
       </section>
     </div>

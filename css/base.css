@@ -87,6 +87,14 @@ body {
   transition: background .3s, color .3s;
   -webkit-font-smoothing: antialiased;
 }
+/* Minecraft-style tiled stone backdrop (dark themes). arctic uses a clean light bg. */
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: url('../assets/tile_dark.png');
+  background-size: 64px 64px; image-rendering: pixelated;
+  opacity: .5;
+}
+body[data-theme="arctic"]::before { display: none; }
 body.no-motion * { animation: none !important; transition: none !important; }
 ::selection { background: var(--acc); color: #06110c; }
 .wrap { max-width: 1120px; margin: 0 auto; padding: 0 22px; }
