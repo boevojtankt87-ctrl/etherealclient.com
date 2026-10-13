@@ -1,5 +1,5 @@
 # python
-server/etherial.db
+server/ethereal.db
 server/__pycache__/
 __pycache__/
 *.pyc

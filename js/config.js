@@ -1,13 +1,13 @@
-/* Etherial — site config. Fill in real links before release. */
+/* Ethereal — site config. Fill in real links before release. */
 window.EthConfig = {
   LAST_UPDATE: '11.10.26',
-  /* Shared backend: paste your hosted API root here, e.g. 'https://etherial-api.onrender.com'.
+  /* Shared backend: paste your hosted API root here, e.g. 'https://ethereal-api.onrender.com'.
      Empty = use same-origin /api (local server.py) or local demo on static hosting. */
   API_BASE: '',
   CONTACTS: {
-    discord: '',   // e.g. 'https://discord.gg/etherial'
-    telegram: '',  // e.g. 'https://t.me/etherial_client'
-    youtube: ''    // e.g. 'https://youtube.com/@etherial'
+    discord: '',   // e.g. 'https://discord.gg/ethereal'
+    telegram: '',  // e.g. 'https://t.me/ethereal_client'
+    youtube: ''    // e.g. 'https://youtube.com/@ethereal'
   },
   /* Bypass status per server. state: 'work' = bypass ok, 'test' = on test, 'fix' = updating.
      Edit versions/dates here after each build. */

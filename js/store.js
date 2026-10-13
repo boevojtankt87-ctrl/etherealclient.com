@@ -1,4 +1,4 @@
-/* Etherial — store facade.
+/* Ethereal — store facade.
    Tries the Python API first; if unreachable (static hosting like
    GitHub Pages) falls back to the local browser backend.
    All methods return promises with identical shapes. */

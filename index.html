@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Etherial Client — чит для Minecraft 1.21.11 | HolyWorld, FunTime, ReallyWorld, DonutSMP</title>
-<meta name="description" content="Etherial Client — приватный клиент для Minecraft 1.21.11 (Fabric). Обходы под HolyWorld, FunTime, ReallyWorld и DonutSMP. Порядковые UID, облачные конфиги, IRC.">
+<title>Ethereal Client — чит для Minecraft 1.21.11 | HolyWorld, FunTime, ReallyWorld, DonutSMP</title>
+<meta name="description" content="Ethereal Client — приватный клиент для Minecraft 1.21.11 (Fabric). Обходы под HolyWorld, FunTime, ReallyWorld и DonutSMP. Порядковые UID, облачные конфиги, IRC.">
 <link rel="icon" type="image/png" href="assets/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +17,7 @@
 
 <header>
   <div class="header-in">
-    <a href="#top" class="logo"><img src="assets/logo.png" alt="Etherial">ETHERIAL</a>
+    <a href="#top" class="logo"><img src="assets/logo.png" alt="Ethereal">ETHEREAL</a>
     <nav class="nav" id="nav">
       <a href="#top">Главная</a>
       <a href="market.html">Маркет</a>
@@ -34,19 +34,33 @@
 
 <main id="top">
 <!-- HERO -->
-<section class="hero wrap">
-  <span class="kicker reveal">ETHERIAL CLIENT · 1.21.11 · FABRIC</span>
-  <h1 class="reveal">Играй на анархии<br>вместе с <em>Etherial</em></h1>
-  <p class="hero-sub reveal">Приватный клиент для анархии: combat-модули, ESP, боты и удобный ClickGUI. Обходы под конкретные сервера доделываем обновлениями — честный статус смотри ниже, без сказок.</p>
-  <div class="srv-row reveal">
-    <span class="srv"><i></i>HOLYWORLD</span>
-    <span class="srv"><i></i>FUNTIME</span>
-    <span class="srv"><i></i>REALLYWORLD</span>
-    <span class="srv"><i></i>DONUTSMP</span>
+<section class="hero">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="hero-veil" aria-hidden="true"></div>
+  <div class="wrap hero-in">
+    <span class="kicker reveal">ETHEREAL CLIENT · 1.21.11 · FABRIC</span>
+    <h1 class="reveal">Играй на анархии<br>вместе с <em>Ethereal</em></h1>
+    <p class="hero-sub reveal">Приватный клиент для анархии: combat-модули, ESP, боты и удобный ClickGUI. Обходы под конкретные сервера доделываем обновлениями — честный статус смотри ниже, без сказок.</p>
+    <div class="srv-row reveal">
+      <span class="srv"><i></i>HOLYWORLD</span>
+      <span class="srv"><i></i>FUNTIME</span>
+      <span class="srv"><i></i>REALLYWORLD</span>
+      <span class="srv"><i></i>DONUTSMP</span>
+    </div>
+    <div class="hero-cta reveal">
+      <a class="btn btn-solid btn-lg" href="#store">Выбрать подписку</a>
+      <a class="btn btn-lg" href="cabinet.html">Открыть кабинет</a>
+    </div>
   </div>
-  <div class="hero-cta reveal">
-    <a class="btn btn-solid btn-lg" href="#store">Выбрать подписку</a>
-    <a class="btn btn-lg" href="cabinet.html">Открыть кабинет</a>
+  <div class="hero-scroll" aria-hidden="true"><span></span></div>
+</section>
+
+<!-- STATS (floats over the hero dissolve) -->
+<section class="stats-bar wrap">
+  <div class="stats reveal stagger">
+    <div class="stat"><b id="statUsers">0</b><span>Пользователей всего</span></div>
+    <div class="stat"><b id="statUpdate">11.10.26</b><span>Последнее обновление</span></div>
+    <div class="stat"><b id="statOnline">0</b><span>Сейчас в сети</span></div>
   </div>
 </section>
 
@@ -101,19 +115,6 @@
   <div class="timeline reveal" id="buildsList"></div>
 </section>
 
-<!-- STATS -->
-<section class="section wrap">
-  <div class="sec-center reveal">
-    <span class="kicker">Статистика</span>
-    <h2>Цифры в реальном времени</h2>
-  </div>
-  <div class="stats reveal stagger">
-    <div class="stat"><b id="statUsers">0</b><span>Пользователей всего</span></div>
-    <div class="stat"><b id="statUpdate">11.10.26</b><span>Последнее обновление</span></div>
-    <div class="stat"><b id="statOnline">0</b><span>Сейчас в сети</span></div>
-  </div>
-</section>
-
 <!-- STORE -->
 <section id="store" class="section wrap">
   <div class="sec-center reveal">
@@ -129,22 +130,22 @@
   <div class="store-grid">
     <div class="product reveal" data-cat="sub">
       <div class="product-vis"><small>ПОДПИСКА</small><b>7 ДНЕЙ</b></div>
-      <div class="product-body"><h3>Подписка Etherial 7 дней</h3><p>Неделя игры: проверить обходы на своём сервере. Скидка для новых аккаунтов.</p>
+      <div class="product-body"><h3>Подписка Ethereal 7 дней</h3><p>Неделя игры: проверить обходы на своём сервере. Скидка для новых аккаунтов.</p>
       <div class="product-price"><s class="old-price">150 ₽</s> 100 ₽</div><button class="btn btn-block" data-buy="D7">Купить</button></div>
     </div>
     <div class="product reveal" data-cat="sub">
       <div class="product-vis"><small>ПОДПИСКА</small><b>30 ДНЕЙ</b></div>
-      <div class="product-body"><h3>Подписка Etherial 30 дней</h3><p>Превосходство над игроками на 30 дней. Все обходы и обновления.</p>
+      <div class="product-body"><h3>Подписка Ethereal 30 дней</h3><p>Превосходство над игроками на 30 дней. Все обходы и обновления.</p>
       <div class="product-price">300 ₽</div><button class="btn btn-block" data-buy="D30">Купить</button></div>
     </div>
     <div class="product reveal" data-cat="sub">
       <div class="product-vis"><small>ПОДПИСКА</small><b>90 ДНЕЙ</b></div>
-      <div class="product-body"><h3>Подписка Etherial 90 дней</h3><p>Полный сезон вайпов с актуальными обходами.</p>
+      <div class="product-body"><h3>Подписка Ethereal 90 дней</h3><p>Полный сезон вайпов с актуальными обходами.</p>
       <div class="product-price">550 ₽</div><button class="btn btn-block" data-buy="D90">Купить</button></div>
     </div>
     <div class="product reveal" data-cat="sub">
       <div class="product-vis"><small>ПОДПИСКА</small><b>180 ДНЕЙ</b></div>
-      <div class="product-body"><h3>Подписка Etherial 180 дней</h3><p>Полгода игры. Самый выгодный вариант за день.</p>
+      <div class="product-body"><h3>Подписка Ethereal 180 дней</h3><p>Полгода игры. Самый выгодный вариант за день.</p>
       <div class="product-price">800 ₽</div><button class="btn btn-block" data-buy="D180">Купить</button></div>
     </div>
     <div class="product reveal" data-cat="svc">
@@ -181,7 +182,7 @@
     <div class="qa reveal"><button>Забыл пароль — что делать?<i>+</i></button><div class="qa-body">Нажми «Забыл пароль» в окне входа, введи ник и почту с регистрации — задашь новый пароль, все сессии при этом сбросятся. Поэтому указывай рабочую почту.</div></div>
     <div class="qa reveal"><button>Что такое UID?<i>+</i></button><div class="qa-body">Порядковый номер твоего аккаунта: кто первый зарегистрировался — UID 1, второй — UID 2 и так далее. UID нужен для входа в лаунчер и клиент, к нему привязываются подписка и железо. Свой номер всегда виден в кабинете.</div></div>
     <div class="qa reveal"><button>Под какие сервера делаете обходы?<i>+</i></button><div class="qa-body">Целимся в HolyWorld, FunTime, ReallyWorld и DonutSMP. Клиент в активной разработке: combat и render уже есть, серверные обходы доделываются — актуальный статус смотри в таблице выше и журнале обновлений.</div></div>
-    <div class="qa reveal"><button>Как установить клиент?<i>+</i></button><div class="qa-body">Нужны Minecraft 1.21.11, Java 21 и Fabric Loader 0.19.5. Кладёшь jar в папку mods, запускаешь игру, в меню Etherial вводишь свой UID. Установка занимает минут пять, гайд есть в Discord.</div></div>
+    <div class="qa reveal"><button>Как установить клиент?<i>+</i></button><div class="qa-body">Нужны Minecraft 1.21.11, Java 21 и Fabric Loader 0.19.5. Кладёшь jar в папку mods, запускаешь игру, в меню Ethereal вводишь свой UID. Установка занимает минут пять, гайд есть в Discord.</div></div>
     <div class="qa reveal"><button>Сколько стоит сброс HWID?<i>+</i></button><div class="qa-body">150₽, оплачивается отдельно во вкладке Главная личного кабинета. Сброс мгновенный, количество не ограничено — каждый оплачивается отдельно.</div></div>
     <div class="qa reveal"><button>Что за роли tester / youtube / tiktok / moderator?<i>+</i></button><div class="qa-body">Роли выдаёт администратор (zxs). Tester — ранний доступ к билдам, youtube и tiktok — партнёрка для авторов, moderator — модерация чата. Роль видна рядом с ником в кабинете и IRC.</div></div>
     <div class="qa reveal"><button>Что будет, если не запустится на моём ПК?<i>+</i></button><div class="qa-body">Напиши в поддержку с указанием UID — разберём логи лоадера. Если клиент технически не запускается и мы не помогли за 24 часа, вернём деньги за неиспользованные дни.</div></div>
@@ -212,9 +213,9 @@
 
 <footer>
   <div class="wrap foot-in">
-    <div class="foot-logo">Etherial</div>
+    <div class="foot-logo">Ethereal</div>
     <div class="foot-links"><a href="#store">Тарифы</a><a href="market.html">Маркет</a><a href="#contacts">Контакты</a><a href="cabinet.html">Кабинет</a><a href="#faq">FAQ</a></div>
-    <div class="foot-bottom" style="border:none;padding:18px 0 0">© 2026 Etherial. All rights reserved.</div>
+    <div class="foot-bottom" style="border:none;padding:18px 0 0">© 2026 Ethereal. All rights reserved.</div>
   </div>
 </footer>
 

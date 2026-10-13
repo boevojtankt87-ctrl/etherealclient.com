@@ -1,4 +1,4 @@
-"""Etherial — SQLite layer. No third-party dependencies."""
+"""Ethereal — SQLite layer. No third-party dependencies."""
 import hashlib
 import json
 import os
@@ -7,7 +7,7 @@ import secrets
 import sqlite3
 import time
 
-PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'etherial.db')
+PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ethereal.db')
 ROLES = ['user', 'tester', 'youtube', 'tiktok', 'moderator', 'admin']
 PLANS = {'TRIAL': 1, 'D7': 7, 'D30': 30, 'D90': 90, 'D180': 180}
 BUYABLE = {'D7', 'D30', 'D90', 'D180'}
@@ -89,7 +89,7 @@ def init():
     if not cur.execute('SELECT 1 FROM builds LIMIT 1').fetchone():
         now = int(time.time())
         cur.execute('INSERT INTO builds(version,title,text,ts) VALUES(?,?,?,?)',
-                    ('v1.0', 'Релиз Etherial',
+                    ('v1.0', 'Релиз Ethereal',
                      'Первый публичный билд: ClickGUI, Aura/Speed/ESP-пресеты, облачные конфиги, IRC.',
                      now - 40 * 86400))
         cur.execute('INSERT INTO builds(version,title,text,ts) VALUES(?,?,?,?)',

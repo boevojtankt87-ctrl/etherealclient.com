@@ -1,4 +1,4 @@
-/* Etherial — market page */
+/* Ethereal — market page */
 (function () {
   'use strict';
   var S = window.EthStore;

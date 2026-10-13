@@ -1,4 +1,4 @@
-/* Etherial Client — base: one font, pill nav, footer, buttons, modal, toast */
+/* Ethereal Client — base: one font, pill nav, footer, buttons, modal, toast */
 :root {
   --bg: #0a0d0c;
   --panel: #101413;
@@ -98,22 +98,24 @@ a { color: inherit; }
 /* ---------- floating pill header ---------- */
 header { position: sticky; top: 14px; z-index: 50; background: transparent; }
 .header-in {
-  max-width: 920px; margin: 0 auto; padding: 0 8px 0 20px; height: 58px;
+  max-width: 940px; margin: 0 auto; padding: 0 10px 0 22px; height: 60px;
   display: flex; align-items: center; gap: 16px;
-  background: rgba(13, 17, 16, .88);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--line);
-  border-radius: 22px;
+  background: rgba(10, 14, 13, .74);
+  backdrop-filter: blur(22px) saturate(1.3);
+  border: 1px solid var(--line2);
+  border-radius: 999px;
+  box-shadow: 0 24px 50px -28px rgba(0, 0, 0, .9), inset 0 1px 0 rgba(255, 255, 255, .05);
 }
-body[data-theme="mono"] .header-in { background: rgba(12, 12, 12, .9); }
-.logo { display: flex; align-items: center; gap: 9px; text-decoration: none; font-weight: 800; font-size: 16px; letter-spacing: -.2px; }
-.logo img { width: 26px; height: 26px; object-fit: contain; }
+body[data-theme="mono"] .header-in { background: rgba(12, 12, 12, .82); }
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 800; font-size: 15.5px; letter-spacing: .4px; }
+.logo img { width: 27px; height: 27px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(78, 186, 142, .45)); }
 .nav { display: flex; gap: 4px; margin: 0 auto; }
 .nav a {
   color: var(--mut); text-decoration: none; font-size: 13.5px; font-weight: 600;
-  padding: 9px 15px; border-radius: 12px;
+  padding: 9px 15px; border-radius: 999px;
+  transition: color .2s, background .2s;
 }
-.nav a:hover, .nav a.on { color: var(--txt); background: rgba(255, 255, 255, .06); }
+.nav a:hover, .nav a.on { color: var(--txt); background: rgba(255, 255, 255, .07); }
 .header-right { display: flex; align-items: center; gap: 8px; }
 
 /* ---------- buttons ---------- */
@@ -142,13 +144,21 @@ body[data-theme="mono"] .header-in { background: rgba(12, 12, 12, .9); }
 .kicker::before { content: ''; width: 8px; height: 8px; background: var(--acc); transform: rotate(45deg); border-radius: 1.5px; }
 
 /* ---------- footer ---------- */
-footer { border-top: 1px solid var(--line); margin-top: 90px; }
-.foot-in { text-align: center; padding: 44px 22px 30px; }
-.foot-logo { display: inline-flex; align-items: center; gap: 9px; font-weight: 800; font-size: 17px; }
-.foot-logo::before { content: ''; width: 9px; height: 9px; background: var(--acc); transform: rotate(45deg); border-radius: 2px; }
+footer { border-top: 1px solid var(--line); margin-top: 110px; }
+footer::before {
+  content: ''; position: absolute; left: 0; right: 0; top: -1px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--acc) 35%, var(--acc) 65%, transparent);
+  opacity: .45;
+}
+.foot-in { text-align: center; padding: 50px 22px 30px; }
+.foot-logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 17.5px; letter-spacing: .3px; }
+.foot-logo::before {
+  content: ''; width: 10px; height: 10px; background: var(--acc);
+  transform: rotate(45deg); border-radius: 2px; box-shadow: 0 0 12px var(--acc);
+}
 .foot-links { display: flex; gap: 20px; justify-content: center; margin-top: 18px; flex-wrap: wrap; }
-.foot-links a { color: var(--mut); text-decoration: none; font-size: 13px; font-weight: 500; }
-.foot-links a:hover { color: var(--txt); }
+.foot-links a { color: var(--mut); text-decoration: none; font-size: 13px; font-weight: 500; transition: color .2s; }
+.foot-links a:hover { color: var(--acc); }
 .foot-bottom { text-align: center; padding-bottom: 26px; font-size: 12px; color: var(--dim); }
 
 /* ---------- modal ---------- */
@@ -159,9 +169,10 @@ footer { border-top: 1px solid var(--line); margin-top: 90px; }
 }
 .modal.show { opacity: 1; visibility: visible; }
 .modal-card {
-  background: var(--panel); border: 1px solid var(--line2); border-radius: var(--r);
+  background: var(--panel); border: 1px solid var(--line2); border-radius: 26px;
   padding: 32px; width: 100%; max-width: 410px; position: relative;
-  transform: translateY(14px); transition: .25s; max-height: 90vh; overflow: auto;
+  transform: translateY(14px) scale(.98); transition: .25s; max-height: 90vh; overflow: auto;
+  box-shadow: 0 40px 90px -40px rgba(0, 0, 0, .95), inset 0 1px 0 rgba(255, 255, 255, .05);
 }
 .modal.show .modal-card { transform: none; }
 .modal-card.wide { max-width: 1000px; }

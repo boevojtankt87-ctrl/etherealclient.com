@@ -24,7 +24,7 @@ inline std::wstring appDir() {
     } else {
         base = L".";
     }
-    std::wstring d = base + L"\\Etherial";
+    std::wstring d = base + L"\\Ethereal";
     CreateDirectoryW(d.c_str(), nullptr);
     return d;
 }
@@ -67,7 +67,7 @@ inline std::string machineId() {
 
 struct Config {
     std::wstring server = L"http://cg839385.tw1.ru";
-    std::wstring gameDir;   // .etherial/mc
+    std::wstring gameDir;   // .ethereal/mc
     std::string token;
     int ramGb = 4;
     std::wstring gameCmd;   // custom launch override (rarely needed)

@@ -113,13 +113,13 @@ public:
         WNDCLASSW wc{};
         wc.lpfnWndProc = &Ui::procThunk;
         wc.hInstance = h;
-        wc.lpszClassName = L"EtherialLauncher";
+        wc.lpszClassName = L"EtherealLauncher";
         wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
         HICON ico = (HICON)LoadImageW(h, L"IDI_ICON1", IMAGE_ICON, 0, 0, LR_DEFAULTSIZE);
         // icon comes from resources of the exe; fallback none
         wc.hIcon = ico;
         RegisterClassW(&wc);
-        hwnd_ = CreateWindowExW(WS_EX_APPWINDOW, L"EtherialLauncher", L"Etherial Launcher",
+        hwnd_ = CreateWindowExW(WS_EX_APPWINDOW, L"EtherealLauncher", L"Ethereal Launcher",
             WS_POPUP | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, WIN_W, WIN_H,
             nullptr, nullptr, h, this);
         if (!hwnd_) return false;
@@ -464,7 +464,7 @@ private:
         buttons.clear();
         owned_.clear();
         // titlebar
-        txt(dc, 15, true, C_TXT, L"ETHERIAL", 20, 11);
+        txt(dc, 15, true, C_TXT, L"ETHEREAL", 20, 11);
         txt(dc, 11, false, C_ACC, L"LAUNCHER", 108, 15);
         int tb = titleBtn(mx, my);
         txt(dc, 15, false, tb == 2 ? C_TXT : C_MUT, L"–", WIN_W - 72, 10);
@@ -478,7 +478,7 @@ private:
     void paintLogin(HDC dc) {
         int w = 400, x = (WIN_W - w) / 2;
         if (!forgotMode) {
-            txt(dc, 28, true, C_TXT, L"Etherial", (WIN_W - tw(dc, 28, true, L"Etherial")) / 2, 96);
+            txt(dc, 28, true, C_TXT, L"Ethereal", (WIN_W - tw(dc, 28, true, L"Ethereal")) / 2, 96);
             std::wstring s = L"Welcome back!";
             txt(dc, 14, false, C_MUT, s, (WIN_W - tw(dc, 14, false, s)) / 2, 132);
             int y = 176;

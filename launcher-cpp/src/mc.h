@@ -12,7 +12,7 @@
 namespace mc {
 
 const wchar_t* MC_VERSION = L"1.21.11";
-const wchar_t* MOD_URL = L"https://raw.githubusercontent.com/boevojtankt87-ctrl/etherealclient.com/main/files/etherial-client.jar";
+const wchar_t* MOD_URL = L"https://raw.githubusercontent.com/boevojtankt87-ctrl/etherealclient.com/main/files/ethereal-client.jar";
 const wchar_t* FABRIC_META = L"https://meta.fabricmc.net";
 const wchar_t* MOJANG_META = L"https://piston-meta.mojang.com";
 
@@ -317,10 +317,10 @@ struct Game {
         if (!ensureFabric(pr, err)) return false;
         // our mod from GitHub
         if (!modUrl.empty()) {
-            if (pr) { pr->label = L"мод Etherial"; }
+            if (pr) { pr->label = L"мод Ethereal"; }
             std::wstring mods = join(dir, L"mods");
             mkDirs(mods);
-            std::wstring mp = join(mods, L"etherial-client.jar");
+            std::wstring mp = join(mods, L"ethereal-client.jar");
             if (!fetch(modUrl, mp, "", nullptr, L"")) {
                 // retry once (raw cdn hiccup); keep old file if present
                 if (!exists(mp) || fsize(mp) < 1000000) { err = L"мод с GitHub"; return false; }
@@ -386,7 +386,7 @@ struct Game {
         for (auto& j : classpath) { cp += L"\"" + j + L"\";"; }
         std::wstring args = L"-Xmx" + std::to_wstring(ramGb) + L"G -Xms1G"
             L" -Djava.library.path=\"" + nativesDir + L"\""
-            L" -Dminecraft.launcher.brand=etherial -Dminecraft.launcher.version=1.0";
+            L" -Dminecraft.launcher.brand=ethereal -Dminecraft.launcher.version=1.0";
         if (!logPath.empty()) args += L" -Dlog4j.configurationFile=\"" + logPath + L"\"";
         args += L" -cp " + cp + L" net.fabricmc.loader.impl.launch.knot.KnotClient"
             L" --username \"" + nick + L"\""

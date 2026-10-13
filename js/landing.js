@@ -1,4 +1,4 @@
-/* Etherial — landing page logic */
+/* Ethereal — landing page logic */
 (function () {
   'use strict';
   var S = window.EthStore;

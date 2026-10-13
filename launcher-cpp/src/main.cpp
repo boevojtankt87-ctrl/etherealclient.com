@@ -1,4 +1,4 @@
-// Etherial C++ launcher: glue between custom UI, site API and game bootstrap.
+// Ethereal C++ launcher: glue between custom UI, site API and game bootstrap.
 #include "ui.h"
 #include "mc.h"
 #include "sys.h"
@@ -43,7 +43,7 @@ static http::Result apiAuthed(const std::string& path, const std::string& body) 
     http::Result r;
     std::wstring url = g_cfg.server;
     while (!url.empty() && url.back() == L'/') url.pop_back();
-    HINTERNET inet = InternetOpenW(L"EtherialLauncher/1.0", INTERNET_OPEN_TYPE_PRECONFIG, nullptr, nullptr, 0);
+    HINTERNET inet = InternetOpenW(L"EtherealLauncher/1.0", INTERNET_OPEN_TYPE_PRECONFIG, nullptr, nullptr, 0);
     if (!inet) { r.error = L"no inet"; return r; }
     std::wstring full = url + http::narrow_to_wide(path);
     URL_COMPONENTSW p = { sizeof(p) };
@@ -126,7 +126,7 @@ static void pipeline(bool launchAfter) {
     }
     // update mod info line
     {
-        std::wstring mp = mc::join(mc::join(game.dir, L"mods"), L"etherial-client.jar");
+        std::wstring mp = mc::join(mc::join(game.dir, L"mods"), L"ethereal-client.jar");
         unsigned long long sz = mc::fsize(mp);
         if (g_ui) g_ui->jarInfo = std::to_wstring(sz / 1048576) + L" МБ · sha256 " +
             http::narrow_to_wide(crypto::fileSha256(mp).substr(0, 16)) + L"…";
@@ -269,7 +269,7 @@ int WINAPI wWinMain(HINSTANCE h, HINSTANCE, LPWSTR cmd, int) {
     if (g_cfg.gameDir.empty()) {
         wchar_t* ad = nullptr; size_t n = 0;
         _wdupenv_s(&ad, &n, L"APPDATA");
-        g_cfg.gameDir = std::wstring(ad ? ad : L".") + L"\\Etherial\\mc";
+        g_cfg.gameDir = std::wstring(ad ? ad : L".") + L"\\Ethereal\\mc";
         if (ad) free(ad);
     }
     static ui::Ui ui;
@@ -382,7 +382,7 @@ int WINAPI wWinMain(HINSTANCE h, HINSTANCE, LPWSTR cmd, int) {
             refreshMeNow();
         }
         // jar info line
-        std::wstring mp = g_cfg.gameDir + L"\\mods\\etherial-client.jar";
+        std::wstring mp = g_cfg.gameDir + L"\\mods\\ethereal-client.jar";
         DWORD sz = 0;
         HANDLE f = CreateFileW(mp.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
         if (f != INVALID_HANDLE_VALUE) {

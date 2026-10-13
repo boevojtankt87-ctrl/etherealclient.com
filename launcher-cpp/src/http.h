@@ -127,7 +127,7 @@ inline Result request(const std::wstring& url, const std::string& post,
     Result r;
     // WinINet for every text request (localhost and external API alike);
     // curl is only used for large file downloads (curlDownload).
-    HINTERNET inet = InternetOpenW(L"EtherialLauncher/1.0", INTERNET_OPEN_TYPE_PRECONFIG, nullptr, nullptr, 0);
+    HINTERNET inet = InternetOpenW(L"EtherealLauncher/1.0", INTERNET_OPEN_TYPE_PRECONFIG, nullptr, nullptr, 0);
     if (!inet) { r.error = L"no inet"; return r; }
     std::wstring u = url;
     for (int redir = 0; redir < 6; redir++) {

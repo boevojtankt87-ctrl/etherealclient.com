@@ -1,6 +1,6 @@
-# Etherial Client — сайт + база данных
+# Ethereal Client — сайт + база данных
 
-Сайт работает через свой backend: SQLite-база (`server/etherial.db`)
+Сайт работает через свой backend: SQLite-база (`server/ethereal.db`)
 и JSON API (`server/server.py`, только стандартная библиотека Python).
 Ничего ставить не нужно.
 
@@ -42,7 +42,7 @@ Pages отдаёт только статику, поэтому фронт дву
 1. Залить в `public_html`: `index.html`, `cabinet.html`, `market.html`,
    `css/`, `js/`, `assets/`, `files/`, `api.php`, `.htaccess`.
 2. `.htaccess` роутит `/api/*` → `api.php` и запрещает папку `data/`.
-3. База — SQLite в `data/etherial.db`, создаётся сама при первом запросе
+3. База — SQLite в `data/ethereal.db`, создаётся сама при первом запросе
    (нужна запись в папку; если её нет — положи `config.php` с `$MYSQL`).
 4. Фронт сам детектит API (`/api/stats`) и работает с общей базой;
    если API не отвечает — переключается на локальное демо в браузере.
@@ -84,7 +84,7 @@ Pages отдаёт только статику, поэтому фронт дву
   (один голос), результаты live на главной.
 - Маркет конфигов: игроки выставляют пресеты, оплата с баланса,
   продавцу 90%. Текст конфига открывается только после покупки.
-- Шесть тем сайта: Etherial Dark, Mono, Crimson, Toxic, Royal, Arctic + свой акцент.
+- Шесть тем сайта: Ethereal Dark, Mono, Crimson, Toxic, Royal, Arctic + свой акцент.
 
 ## Витрина (демо-оплата)
 

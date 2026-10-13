@@ -1,4 +1,4 @@
-"""Etherial — static site + JSON API. Standard library only.
+"""Ethereal — static site + JSON API. Standard library only.
 
 Run:  python server/server.py   (or start.bat)
 Open: http://localhost:8000
@@ -18,7 +18,7 @@ NICK_RE = re.compile(r'^[A-Za-z0-9_]{3,16}$')
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = 'Etherial/1.0'
+    server_version = 'Ethereal/1.0'
 
     def handle_expect_100(self):
         self.send_response_only(100)
@@ -150,17 +150,17 @@ class Handler(BaseHTTPRequestHandler):
             if not lu:
                 return self._json({'error': 'auth'}, 401)
             plan = lu['plan'] or 'TRIAL'
-            txt = ('ETHERIAL CLIENT LOADER v1.0\n===========================\n'
+            txt = ('ETHEREAL CLIENT LOADER v1.0\n===========================\n'
                    'Nick: %s\nUID: %d\nPlan: %s\n\nMC 1.21.11 | Fabric Loader 0.19.5 | Java 21\n\n'
                    'INSTALL:\n1. Install Java 21 and Fabric Loader 0.19.5 for MC 1.21.11\n'
-                   '2. Put etherial-1.0.jar into .minecraft/mods\n'
-                   '3. Launch the game, enter your UID in the Etherial menu: %d\n'
+                   '2. Put ethereal-1.0.jar into .minecraft/mods\n'
+                   '3. Launch the game, enter your UID in the Ethereal menu: %d\n'
                    '4. RSHIFT in game opens ClickGUI\n' % (lu['nick'], lu['uid'], plan, lu['uid']))
             body = txt.encode('utf-8')
             self.send_response(200)
             self.send_header('Content-Type', 'text/plain; charset=utf-8')
             self.send_header('Content-Disposition',
-                             'attachment; filename="etherial-loader-uid-%d.txt"' % lu['uid'])
+                             'attachment; filename="ethereal-loader-uid-%d.txt"' % lu['uid'])
             self.send_header('Content-Length', str(len(body)))
             self.end_headers()
             self.wfile.write(body)
@@ -353,7 +353,7 @@ if __name__ == '__main__':
     db.init()
     port = int(_os.environ.get('PORT', '8000'))
     srv = ThreadingHTTPServer(('0.0.0.0', port), Handler)
-    print('Etherial server on port %d' % port, flush=True)
+    print('Ethereal server on port %d' % port, flush=True)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:

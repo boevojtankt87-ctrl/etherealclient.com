@@ -1,4 +1,4 @@
-/* Etherial — local backend (browser localStorage).
+/* Ethereal — local backend (browser localStorage).
    Same async interface as the API backend. Used automatically when the
    Python server is unreachable (e.g. GitHub Pages static hosting).
    Demo-grade: data lives in this browser only. */
@@ -62,7 +62,7 @@
       var now = Date.now();
       d.builds = [
         { version: 'v1.4.2', title: 'Обходы HolyWorld и FunTime', text: 'Переписаны ротации Aura и глайды ElytraFly. Пресеты лежат в облаке.', date: fmtDate(now - 3 * DAY) },
-        { version: 'v1.0', title: 'Релиз Etherial', text: 'Первый публичный билд: ClickGUI, Aura/Speed/ESP-пресеты, облачные конфиги, IRC.', date: fmtDate(now - 40 * DAY) }
+        { version: 'v1.0', title: 'Релиз Ethereal', text: 'Первый публичный билд: ClickGUI, Aura/Speed/ESP-пресеты, облачные конфиги, IRC.', date: fmtDate(now - 40 * DAY) }
       ];
     }
     if (!d.polls) {

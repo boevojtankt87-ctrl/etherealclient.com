@@ -1,11 +1,11 @@
-/* Etherial — common: theme settings, header, toasts */
+/* Ethereal — common: theme settings, header, toasts */
 (function () {
   'use strict';
 
-  var THEME_ACC = { etherial: '#4eba8e', mono: '#ededed', crimson: '#e0334f', toxic: '#b8ff29', royal: '#a678ff', arctic: '#0284c7' };
+  var THEME_ACC = { ethereal: '#4eba8e', mono: '#ededed', crimson: '#e0334f', toxic: '#b8ff29', royal: '#a678ff', arctic: '#0284c7' };
   function applyTheme() {
-    var theme = localStorage.getItem('eth_theme') || 'etherial';
-    if (!THEME_ACC[theme]) theme = 'etherial';
+    var theme = localStorage.getItem('eth_theme') || 'ethereal';
+    if (!THEME_ACC[theme]) theme = 'ethereal';
     var acc = localStorage.getItem('eth_accent') || THEME_ACC[theme];
     document.body.dataset.theme = theme;
     document.documentElement.style.setProperty('--acc', acc);

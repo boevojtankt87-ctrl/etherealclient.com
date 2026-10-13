@@ -1,4 +1,4 @@
-/* Etherial — shared card helpers (validation client-side, only SHA-256 goes to server) */
+/* Ethereal — shared card helpers (validation client-side, only SHA-256 goes to server) */
 (function () {
   'use strict';
 

@@ -1,4 +1,4 @@
-/* Etherial — cabinet page: profile / IRC / settings / admin (API-backed) */
+/* Ethereal — cabinet page: profile / IRC / settings / admin (API-backed) */
 (function () {
   'use strict';
   var S = window.EthStore;
@@ -298,11 +298,11 @@
 
   /* ---------- settings ---------- */
   function paintSettings() {
-    var theme = localStorage.getItem('eth_theme') || 'etherial';
+    var theme = localStorage.getItem('eth_theme') || 'ethereal';
     document.querySelectorAll('.theme-card').forEach(function (c) {
       c.classList.toggle('active', c.dataset.theme === theme);
     });
-    var defAcc = { etherial: '#4eba8e', mono: '#ededed', crimson: '#e0334f', toxic: '#b8ff29', royal: '#a678ff', arctic: '#0284c7' }[theme] || '#4eba8e';
+    var defAcc = { ethereal: '#4eba8e', mono: '#ededed', crimson: '#e0334f', toxic: '#b8ff29', royal: '#a678ff', arctic: '#0284c7' }[theme] || '#4eba8e';
     var acc = (localStorage.getItem('eth_accent') || defAcc).toLowerCase();
     document.querySelectorAll('.acc-dot').forEach(function (d) {
       d.classList.toggle('active', d.dataset.color.toLowerCase() === acc);

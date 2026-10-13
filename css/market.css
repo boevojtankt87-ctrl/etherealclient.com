@@ -1,4 +1,4 @@
-/* Etherial — market */
+/* Ethereal — market */
 #bg { position: fixed; inset: 0; z-index: 0; opacity: .45; pointer-events: none; }
 .mk-controls { margin: 26px 0 20px; }
 .mk-tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }

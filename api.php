@@ -1,5 +1,5 @@
 <?php
-/* Etherial API — PHP port of server.py for shared hosting (Timeweb).
+/* Ethereal API — PHP port of server.py for shared hosting (Timeweb).
    Endpoints and JSON shapes are identical to the Python server.
    Storage: SQLite in ./data by default; MySQL if config.php fills $MYSQL. */
 declare(strict_types=1);
@@ -59,7 +59,10 @@ function db(): PDO {
         if (!is_dir($dir) && !@mkdir($dir, 0775, true)) {
             $dir = sys_get_temp_dir(); // last resort: shared /tmp
         }
-        $pdo = new PDO('sqlite:' . $dir . '/etherial.db', null, null, $opts);
+        if (!file_exists($dir . '/ethereal.db') && file_exists($dir . '/etherial.db')) {
+            @rename($dir . '/etherial.db', $dir . '/ethereal.db'); // legacy brand rename
+        }
+        $pdo = new PDO('sqlite:' . $dir . '/ethereal.db', null, null, $opts);
         $pdo->exec('PRAGMA journal_mode=WAL');
         $pdo->exec('PRAGMA busy_timeout=8000');
         driver('sqlite');
@@ -106,7 +109,7 @@ function init_schema(PDO $pdo): void {
     if (!$pdo->query('SELECT 1 FROM builds LIMIT 1')->fetch()) {
         $st = $pdo->prepare('INSERT INTO builds(version,title,text,ts) VALUES(?,?,?,?)');
         $now = time();
-        $st->execute(['v1.0', 'Релиз Etherial',
+        $st->execute(['v1.0', 'Релиз Ethereal',
             'Первый публичный билд: ClickGUI, Aura/Speed/ESP-пресеты, облачные конфиги, IRC.',
             $now - 40 * DAY]);
         $st->execute(['v1.4.2', 'Обходы HolyWorld и FunTime',
@@ -292,15 +295,15 @@ if ($method === 'GET') {
         $u = user_by_token(reqToken());
         if (!$u) out(['error' => 'auth'], 401);
         $plan = $u['plan'] ?: 'TRIAL';
-        $txt = "ETHERIAL CLIENT LOADER v1.0\n===========================\n"
+        $txt = "ETHEREAL CLIENT LOADER v1.0\n===========================\n"
              . "Nick: {$u['nick']}\nUID: {$u['uid']}\nPlan: {$plan}\n\n"
              . "MC 1.21.11 | Fabric Loader 0.19.5 | Java 21\n\n"
              . "INSTALL:\n1. Install Java 21 and Fabric Loader 0.19.5 for MC 1.21.11\n"
-             . "2. Put etherial-1.0.jar into .minecraft/mods\n"
-             . "3. Launch the game, enter your UID in the Etherial menu: {$u['uid']}\n"
+             . "2. Put ethereal-1.0.jar into .minecraft/mods\n"
+             . "3. Launch the game, enter your UID in the Ethereal menu: {$u['uid']}\n"
              . "4. RSHIFT in game opens ClickGUI\n";
         header('Content-Type: text/plain; charset=utf-8');
-        header('Content-Disposition: attachment; filename="etherial-loader-uid-' . $u['uid'] . '.txt"');
+        header('Content-Disposition: attachment; filename="ethereal-loader-uid-' . $u['uid'] . '.txt"');
         echo $txt;
         exit;
     }

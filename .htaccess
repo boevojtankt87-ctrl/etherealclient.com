@@ -1,4 +1,4 @@
-# Etherial — shared hosting (Timeweb/Apache) config
+# Ethereal — shared hosting (Timeweb/Apache) config
 AddDefaultCharset UTF-8
 DirectoryIndex index.html
 Options -Indexes
