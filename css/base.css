@@ -87,14 +87,30 @@ body {
   transition: background .3s, color .3s;
   -webkit-font-smoothing: antialiased;
 }
-/* Minecraft-style tiled stone backdrop (dark themes). arctic uses a clean light bg. */
+/* animated aurora backdrop: soft accent blobs slowly drifting over pure black */
 body::before {
-  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background-image: url('../assets/tile_dark.png');
-  background-size: 64px 64px; image-rendering: pixelated;
-  opacity: .5;
+  content: ''; position: fixed; inset: -25%; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(38% 32% at 18% 22%, var(--acc-dim), transparent 70%),
+    radial-gradient(32% 28% at 82% 18%, var(--acc-dim), transparent 72%),
+    radial-gradient(42% 36% at 62% 82%, var(--acc-dim), transparent 70%),
+    radial-gradient(28% 24% at 30% 70%, var(--acc-dim), transparent 74%);
+  animation: auroraDrift 28s ease-in-out infinite alternate;
 }
-body[data-theme="arctic"]::before { display: none; }
+@keyframes auroraDrift {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(2.5%, -1.8%) scale(1.04); }
+  66%  { transform: translate(-2%, 1.5%) scale(1.02); }
+  100% { transform: translate(1.5%, 2.2%) scale(1.05); }
+}
+/* fine film grain over everything (static pattern, cheap) */
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  opacity: .5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='.05'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+body[data-theme="arctic"]::before,
+body[data-theme="arctic"]::after { display: none; }
 body.no-motion * { animation: none !important; transition: none !important; }
 ::selection { background: var(--acc); color: #06110c; }
 .wrap { max-width: 1120px; margin: 0 auto; padding: 0 22px; }

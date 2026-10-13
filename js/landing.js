@@ -4,7 +4,39 @@
   var S = window.EthStore;
   var CFG = window.EthConfig || { CONTACTS: {} };
 
-  /* static background grid removed — Minecraft tiled stone (base.css body::before) + hero wallpaper cover the page */
+  /* floating dust particles over the hero (skipped when motion is off) */
+  if (!document.body.classList.contains('no-motion')) {
+    var host = document.querySelector('.hero-particles');
+    if (host) {
+      for (var i = 0; i < 26; i++) {
+        var d = document.createElement('i');
+        d.style.left = (Math.random() * 100).toFixed(2) + '%';
+        d.style.animationDuration = (9 + Math.random() * 14).toFixed(2) + 's';
+        d.style.animationDelay = (-Math.random() * 20).toFixed(2) + 's';
+        var sz = (2 + Math.random() * 2.5).toFixed(1);
+        d.style.width = sz + 'px';
+        d.style.height = sz + 'px';
+        host.appendChild(d);
+      }
+    }
+  }
+
+  /* hero parallax: wallpaper drifts slower than the scroll */
+  var heroWrap = document.querySelector('.hero-bg-wrap');
+  if (heroWrap && !document.body.classList.contains('no-motion')) {
+    var ticking = false;
+    window.addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        var y = window.scrollY;
+        if (y < window.innerHeight * 1.2) {
+          heroWrap.style.transform = 'translateY(' + (y * 0.22).toFixed(1) + 'px)';
+        }
+        ticking = false;
+      });
+    }, { passive: true });
+  }
 
   /* reveal */
   var io = new IntersectionObserver(function (es) {
